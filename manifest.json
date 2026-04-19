@@ -1,0 +1,108 @@
+{
+  "protocol": "clawbridge",
+  "version": "1.0.0",
+  "updated": "2026-04-19",
+  "cdn": "https://raw.githubusercontent.com/miikeey1100/Claude-Design-Handoff-Vault/main",
+  "repo": "https://github.com/miikeey1100/Claude-Design-Handoff-Vault",
+  "install": "npx clawbridge use <slug>",
+  "skill": "npx clawbridge skill install",
+  "families": ["Liquid Glass", "Monochrome"],
+  "bundles": [
+    {
+      "slug": "aerodrop",
+      "title": "AeroDrop — Autonomous AI Delivery",
+      "family": "Liquid Glass",
+      "fidelity": 99,
+      "tags": ["mobile", "delivery", "ios-frame", "react", "elite"],
+      "dir": "bundles/aerodrop-luxury-ui",
+      "primary": "project/AeroDrop.html",
+      "chat": "chats/chat1.md",
+      "preview": "previews/aerodrop.png",
+      "comparison": "previews/comparisons/aerodrop.png"
+    },
+    {
+      "slug": "agentic-ops",
+      "title": "Agentic Ops — Swarm Console",
+      "family": "Monochrome",
+      "fidelity": 97,
+      "tags": ["dashboard", "swarm", "terminal", "monochrome", "elite"],
+      "dir": "bundles/agentic-ops",
+      "primary": "project/Agentic Ops.html",
+      "chat": "chats/chat1.md",
+      "preview": "previews/agentic-ops.png",
+      "comparison": "previews/comparisons/agentic-ops.png"
+    },
+    {
+      "slug": "biopulse",
+      "title": "BioPulse — AI Health Tracker",
+      "family": "Liquid Glass",
+      "fidelity": 96,
+      "tags": ["mobile", "health", "ios-frame", "react"],
+      "dir": "bundles/biopulse-ai",
+      "primary": "project/BioPulse.html",
+      "chat": "chats/chat1.md",
+      "preview": "previews/biopulse.png",
+      "comparison": "previews/comparisons/biopulse.png"
+    },
+    {
+      "slug": "luxar-vault",
+      "title": "Luxar Vault — AI Crypto Wallet",
+      "family": "Liquid Glass",
+      "fidelity": 98,
+      "tags": ["finance", "wallet", "crypto", "react", "elite"],
+      "dir": "bundles/holowallet",
+      "primary": "project/Luxar Vault.html",
+      "chat": "chats/chat1.md",
+      "preview": "previews/luxar-vault.png",
+      "comparison": "previews/comparisons/luxar-vault.png"
+    },
+    {
+      "slug": "orchestrator",
+      "title": "Orchestrator — LogicChain",
+      "family": "Monochrome",
+      "fidelity": 95,
+      "tags": ["workflow", "graph", "pipeline", "monochrome"],
+      "dir": "bundles/logicchain",
+      "primary": "project/Orchestrator.html",
+      "chat": "chats/chat1.md",
+      "preview": "previews/orchestrator.png",
+      "comparison": "previews/comparisons/orchestrator.png"
+    },
+    {
+      "slug": "neuralstore",
+      "title": "NeuralStore — Engineered for Signal",
+      "family": "Monochrome",
+      "fidelity": 96,
+      "tags": ["ecommerce", "light-mode", "editorial", "monochrome"],
+      "dir": "bundles/neuralstore",
+      "primary": "project/NeuralStore.html",
+      "chat": "chats/chat1.md",
+      "preview": "previews/neuralstore.png",
+      "comparison": "previews/comparisons/neuralstore.png"
+    },
+    {
+      "slug": "frontier",
+      "title": "Frontier — The AI-native IDE",
+      "family": "Monochrome",
+      "fidelity": 94,
+      "tags": ["ide", "editor", "developer-tool", "monochrome"],
+      "dir": "bundles/vibe-design",
+      "primary": "project/Frontier Landing.html",
+      "chat": "chats/chat1.md",
+      "preview": "previews/frontier.png",
+      "comparison": "previews/comparisons/frontier.png"
+    },
+    {
+      "slug": "visionsynth",
+      "title": "VisionSynth — AI Video Generator",
+      "family": "Liquid Glass",
+      "fidelity": 97,
+      "tags": ["video", "timeline", "generator", "react", "elite"],
+      "dir": "bundles/visionsynth",
+      "primary": "project/VisionSynth.html",
+      "chat": "chats/chat1.md",
+      "preview": "previews/visionsynth.png",
+      "comparison": "previews/comparisons/visionsynth.png"
+    }
+  ]
+}

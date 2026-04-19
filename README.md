@@ -1,129 +1,159 @@
 <div align="center">
 
-# ⬡ Clawkit
+# ⬡ ClawBridge
 
-### Stream production-grade UI designs directly into Claude Code — one command.
+### The Design-to-Code Protocol for Claude
 
-[![npm](https://img.shields.io/npm/v/clawkit?style=for-the-badge&logo=npm&color=000)](https://www.npmjs.com/package/clawkit)
+**Stream pixel-perfect UI bundles from a community CDN directly into Claude Code — one command.**
+
+[![npm](https://img.shields.io/npm/v/clawbridge?style=for-the-badge&logo=npm&color=000&label=clawbridge)](https://www.npmjs.com/package/clawbridge)
 [![Stars](https://img.shields.io/github/stars/miikeey1100/Claude-Design-Handoff-Vault?style=for-the-badge&logo=github&color=000)](https://github.com/miikeey1100/Claude-Design-Handoff-Vault/stargazers)
 [![License](https://img.shields.io/badge/license-MIT-000?style=for-the-badge)](LICENSE)
+[![Protocol](https://img.shields.io/badge/protocol-v1.0-FFD700?style=for-the-badge)](manifest.json)
 
 </div>
 
 ---
 
-## Magic Setup
+## The Protocol
 
-```bash
-npx clawkit use aerodrop | claude
+ClawBridge is not just a CLI — it's a **three-layer protocol**:
+
+```
+manifest.json          CDN registry of all design bundles
+bin/clawbridge.js      Fetch layer: pulls bundle, builds implementation prompt
+CLAUDE.md + SKILL.md   Contract layer: token rules Claude Code enforces automatically
 ```
 
-That's it. Clawkit fetches the full HTML design, its design-token contract, and the original user intent — and pipes it into Claude Code as a structured implementation prompt.
-
-```bash
-# or with the -p flag
-claude -p "$(npx clawkit use luxar-vault)"
-
-# list all 8 bundles
-npx clawkit list
-```
+Every bundle ships with its full HTML prototype, design-token family, and the original user intent transcript. Claude Code gets a **complete, constrained brief** — not a vague description.
 
 ---
 
-## What is Clawkit?
+## Magic Command
 
-Clawkit is a 30-line Node script that turns Claude Design handoff bundles into a community CDN for Claude Code. Every bundle ships with its full HTML prototype, design token family, and original user intent transcript. You get a **100% fidelity prompt** — not a vague description.
+```bash
+npx clawbridge use aerodrop | claude
+```
 
-No build step. No framework lock-in. Pipe it, fork it, ship it.
+```bash
+# Or with -p flag
+claude -p "$(npx clawbridge use luxar-vault)"
+
+# Pipe to a file, edit, then run
+npx clawbridge use visionsynth > brief.txt && claude < brief.txt
+
+# Browse all bundles
+npx clawbridge list
+
+# Install as a permanent Claude Skill
+npx clawbridge skill install
+```
+
+> **Record your own demo GIF:** `vhs marketing/record-demo.tape` — see [marketing/record-demo.tape](marketing/record-demo.tape)
 
 ---
 
-## Bundle Gallery
+## Bundle Registry — 8 Bundles, 2 Families
+
+### ✦ Elite Tier — 4 Flagship Bundles
+
+| Code Fidelity Preview | Bundle | Family | Fidelity | Command |
+|---|---|---|---|---|
+| ![AeroDrop](previews/comparisons/aerodrop.png) | **AeroDrop**<br>Autonomous AI Delivery | Liquid Glass | **99% CSS Match** | `npx clawbridge use aerodrop` |
+| ![Agentic Ops](previews/comparisons/agentic-ops.png) | **Agentic Ops**<br>Swarm Console | Monochrome | **97% CSS Match** | `npx clawbridge use agentic-ops` |
+| ![Luxar Vault](previews/comparisons/luxar-vault.png) | **Luxar Vault**<br>AI Crypto Wallet | Liquid Glass | **98% CSS Match** | `npx clawbridge use luxar-vault` |
+| ![VisionSynth](previews/comparisons/visionsynth.png) | **VisionSynth**<br>AI Video Generator | Liquid Glass | **97% CSS Match** | `npx clawbridge use visionsynth` |
+
+### ◆ Extended Library — 4 Additional Bundles
 
 | Preview | Bundle | Family | Fidelity | Command |
 |---|---|---|---|---|
-| ![AeroDrop](previews/aerodrop.png) | **AeroDrop**<br>Autonomous AI Delivery | Liquid Glass | **98%** | `npx clawkit use aerodrop` |
-| ![Agentic Ops](previews/agentic-ops.png) | **Agentic Ops**<br>Swarm Console | Monochrome | **97%** | `npx clawkit use agentic-ops` |
-| ![BioPulse](previews/biopulse.png) | **BioPulse**<br>AI Health Tracker | Liquid Glass | **96%** | `npx clawkit use biopulse` |
-| ![Luxar Vault](previews/luxar-vault.png) | **Luxar Vault**<br>AI Crypto Wallet | Liquid Glass | **98%** | `npx clawkit use luxar-vault` |
-| ![Orchestrator](previews/orchestrator.png) | **Orchestrator**<br>LogicChain | Monochrome | **95%** | `npx clawkit use orchestrator` |
-| ![NeuralStore](previews/neuralstore.png) | **NeuralStore**<br>Engineered for Signal | Monochrome | **96%** | `npx clawkit use neuralstore` |
-| ![Frontier](previews/frontier.png) | **Frontier**<br>The AI-native IDE | Monochrome | **94%** | `npx clawkit use frontier` |
-| ![VisionSynth](previews/visionsynth.png) | **VisionSynth**<br>AI Video Generator | Liquid Glass | **97%** | `npx clawkit use visionsynth` |
+| ![BioPulse](previews/biopulse.png) | **BioPulse** — AI Health Tracker | Liquid Glass | 96% | `npx clawbridge use biopulse` |
+| ![NeuralStore](previews/neuralstore.png) | **NeuralStore** — Engineered for Signal | Monochrome | 96% | `npx clawbridge use neuralstore` |
+| ![Orchestrator](previews/orchestrator.png) | **Orchestrator** — LogicChain | Monochrome | 95% | `npx clawbridge use orchestrator` |
+| ![Frontier](previews/frontier.png) | **Frontier** — AI-native IDE | Monochrome | 94% | `npx clawbridge use frontier` |
 
 ### What is Fidelity Score?
 
-Each score measures how completely a bundle's prompt covers the original design: color token coverage, radius/blur/spacing fidelity, layout accuracy, and interactive-state completeness versus the Claude Design prototype. **98% = every token and state accounted for.**
+Each score is an honest assessment of the prompt's completeness against the original design: **color token coverage** (oklch values, not approximations), **layout accuracy** (spacing, radii, blur), **type fidelity** (weights, tracking, font stacks), and **interactive state coverage**. 99% = every token, every state, nothing left to guesswork.
 
 ---
 
 ## Design Families
 
-Every bundle belongs to one of two strictly-defined families. Mixing them is explicitly banned in [CLAUDE.md](CLAUDE.md).
+Every ClawBridge bundle belongs to one of two families. Mixing is explicitly banned in [CLAUDE.md](CLAUDE.md).
 
-| | Liquid Glass | Monochrome |
+| | ✦ Liquid Glass | ◆ Monochrome |
 |---|---|---|
 | Surface | `oklch(0.09 0.04 260)` + radial wash | `#0a0b0c` flat, hairline grids |
 | Panel | `oklch(1 0 0 / 0.04)` + `blur(16px)` | `#111315`, no blur |
-| Stroke | `oklch(1 0 0 / 0.10)` | `#23282d`, 1px |
+| Stroke | `oklch(1 0 0 / 0.10)` | `#23282d`, 1px only |
 | Type | SF Pro Display / Space Grotesk | Chakra Petch / Space Grotesk |
 | Mono | JetBrains Mono | JetBrains Mono |
-| Radius | 10 / 16 / 24 / 32 | 0–6 only |
-| Accent | wash-driven, no single token | `#00b872` — one, earned |
+| Radius | 10 / 16 / 24 / 32px | 0–6px only |
+| Accent | Wash-driven, no single token | `#00b872` — one, earned |
 | Baseline | 8px | 4px strict |
 
-Full contract → [**CLAUDE.md**](CLAUDE.md)
+---
+
+## Install as a Permanent Claude Skill
+
+```bash
+npx clawbridge skill install
+```
+
+This writes the ClawBridge token contract into your `./CLAUDE.md`. Every Claude Code session in that directory will automatically enforce fidelity rules — no flags, no reminders.
+
+See [SKILL.md](SKILL.md) for manual install, what the skill enforces, and how to uninstall.
 
 ---
 
-## How it works
+## Protocol Internals
 
+```bash
+# Inspect the CDN registry
+npx clawbridge manifest
+
+# Get metadata + preview URL for a specific bundle
+npx clawbridge info aerodrop
 ```
-bundles/<slug>/project/*.html     ← prototype from claude.ai/design
-        │
-        ├── chats/chat1.md        ← the user's original intent
-        │
-        ▼
-bin/clawkit                       ← fetches both from GitHub raw, builds prompt
-        │
-        ▼
-stdout → claude                   ← Claude Code implements pixel-perfectly
-        │
-        ▼
-previews/<slug>.png               ← 1920×1080 @2x, captured by Playwright
-```
+
+The [`manifest.json`](manifest.json) is machine-readable and stable — build on top of it.
 
 ---
 
-## ⭐ Star for Grant
+## ⭐ Star for the Anthropic OSS Grant
 
-Running 8 (soon 32) design bundles on GitHub raw as a community CDN isn't free forever. We're applying for Anthropic's OSS grant to keep this free and add:
-
-- CLI auto-update when new bundles drop
-- `npx clawkit new` to export your own Claude Design bundle
-- GitHub Action to auto-regenerate previews on push
+ClawBridge runs on GitHub Raw as a free community CDN. To keep it open-source and fund the next phase, we're applying for the **Anthropic OSS Grant**.
 
 **Goal: 5,000 stars → grant application.**
 
-[**⭐ Star this repo now**](https://github.com/miikeey1100/Claude-Design-Handoff-Vault/stargazers) — every star is a vote to keep the CDN free.
+The grant funds:
+- `npx clawbridge new` — export your own Claude Design bundle to the CDN
+- CLI auto-update when new bundles drop (`npx clawbridge update`)
+- GitHub Action: auto-regenerate comparison previews on every PR
+- 32 total bundles by EOY (currently 8)
+
+[**⭐ Star ClawBridge now**](https://github.com/miikeey1100/Claude-Design-Handoff-Vault/stargazers) — every star is a vote for a free, open design-to-code infrastructure.
 
 ---
 
 ## Contributing a Bundle
 
-1. Export from [claude.ai/design](https://claude.ai/design) → drop into `bundles/<slug>/`.
-2. Pick a family (Liquid Glass or Monochrome) — see [CLAUDE.md](CLAUDE.md).
-3. Add a row to `BUNDLES` in `bin/clawkit` and `scripts/capture.mjs`.
-4. `npm run capture` — commit the new 1080p PNG.
-5. Add a row to the gallery table above.
-6. Open a PR.
+1. Export from [claude.ai/design](https://claude.ai/design) → drop into `bundles/<slug>/`
+2. Pick a family (Liquid Glass or Monochrome) — see [CLAUDE.md](CLAUDE.md)
+3. Add an entry to [`manifest.json`](manifest.json)
+4. Add a row to the `bin/clawbridge.js` fetch map (if needed)
+5. `npm run compare` — commit the new fidelity screenshot
+6. Add a row to the gallery above
+7. Open a PR
 
 ---
 
 <div align="center">
 
-MIT licensed · designs by [claude.ai/design](https://claude.ai/design) · CLI by [miikeey1100](https://github.com/miikeey1100)
+MIT licensed · designs by [claude.ai/design](https://claude.ai/design) · protocol by [miikeey1100](https://github.com/miikeey1100)
 
-[**npx clawkit list**](https://github.com/miikeey1100/Claude-Design-Handoff-Vault) · [CLAUDE.md](CLAUDE.md) · [marketing/](marketing/)
+**[manifest.json](manifest.json) · [CLAUDE.md](CLAUDE.md) · [SKILL.md](SKILL.md) · [marketing/](marketing/)**
 
 </div>
