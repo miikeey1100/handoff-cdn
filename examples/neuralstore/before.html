@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Store</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #f8fafc;
+    color: #1e293b;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 14px;
+  }
+  .topbar {
+    background: #fff;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  .brand { font-size: 18px; font-weight: 800; color: #6366f1; letter-spacing: -0.03em; }
+  .nav { display: flex; gap: 28px; }
+  .nav a { font-size: 13px; color: #64748b; text-decoration: none; font-weight: 500; }
+  .nav a.active { color: #6366f1; }
+  .topbar-right { display: flex; align-items: center; gap: 12px; }
+  .btn-primary {
+    background: #6366f1; color: #fff;
+    border: none; border-radius: 8px;
+    padding: 8px 16px; font-size: 13px; font-weight: 600;
+    cursor: pointer;
+  }
+
+  .hero {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    color: #fff;
+    padding: 60px 32px;
+    text-align: center;
+  }
+  .hero h1 { font-size: 36px; font-weight: 800; margin-bottom: 12px; letter-spacing: -0.03em; }
+  .hero p { font-size: 16px; opacity: 0.85; max-width: 480px; margin: 0 auto 24px; line-height: 1.5; }
+  .hero-search {
+    display: flex; gap: 8px; max-width: 480px; margin: 0 auto;
+  }
+  .hero-input {
+    flex: 1; padding: 12px 16px; border-radius: 10px; border: none;
+    font-size: 14px; outline: none;
+  }
+  .hero-btn {
+    background: #fff; color: #6366f1; font-weight: 700;
+    padding: 12px 20px; border-radius: 10px; border: none;
+    font-size: 14px; cursor: pointer;
+  }
+
+  .categories {
+    padding: 32px;
+    display: flex; gap: 12px; overflow-x: auto;
+    background: #fff;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  .cat-chip {
+    padding: 7px 16px; border-radius: 20px; font-size: 12px; font-weight: 600;
+    white-space: nowrap; cursor: pointer; border: 1px solid #e2e8f0;
+    background: #f8fafc; color: #64748b;
+  }
+  .cat-chip.active { background: #6366f1; color: #fff; border-color: #6366f1; }
+
+  .main { padding: 32px; max-width: 1200px; margin: 0 auto; }
+  .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  .section-title { font-size: 18px; font-weight: 700; }
+  .see-all { font-size: 13px; color: #6366f1; font-weight: 600; cursor: pointer; }
+
+  .products { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 40px; }
+  .product-card {
+    background: #fff;
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    cursor: pointer;
+    transition: box-shadow 0.2s, transform 0.2s;
+  }
+  .product-card:hover { box-shadow: 0 8px 24px rgba(99,102,241,0.15); transform: translateY(-2px); }
+  .product-img {
+    height: 160px;
+    background: linear-gradient(135deg, #ede9fe 0%, #e0e7ff 100%);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 48px;
+  }
+  .product-info { padding: 14px; }
+  .product-name { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+  .product-desc { font-size: 11px; color: #94a3b8; margin-bottom: 10px; line-height: 1.4; }
+  .product-footer { display: flex; justify-content: space-between; align-items: center; }
+  .product-price { font-size: 15px; font-weight: 800; color: #6366f1; }
+  .add-btn {
+    background: #6366f1; color: #fff;
+    border: none; border-radius: 8px;
+    padding: 6px 12px; font-size: 11px; font-weight: 600; cursor: pointer;
+  }
+
+  .ai-chat {
+    position: fixed; bottom: 24px; right: 24px;
+    width: 320px;
+    background: #fff;
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.12);
+    overflow: hidden;
+  }
+  .chat-header {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    padding: 14px 16px;
+    color: #fff;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .chat-avatar { width: 32px; height: 32px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+  .chat-name { font-weight: 700; font-size: 13px; }
+  .chat-status { font-size: 11px; opacity: 0.8; }
+  .chat-body { padding: 14px; max-height: 180px; overflow-y: auto; }
+  .chat-bubble { background: #f1f5f9; border-radius: 12px 12px 12px 4px; padding: 10px 12px; font-size: 12px; line-height: 1.45; color: #334155; margin-bottom: 8px; }
+  .chat-input-row { padding: 10px 12px; border-top: 1px solid #f1f5f9; display: flex; gap: 8px; }
+  .chat-input { flex: 1; border: 1px solid #e2e8f0; border-radius: 8px; padding: 7px 10px; font-size: 12px; outline: none; }
+  .chat-send { background: #6366f1; color: #fff; border: none; border-radius: 8px; padding: 7px 12px; font-size: 12px; font-weight: 700; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">✦ NeuralShop</div>
+  <nav class="nav">
+    <a href="#" class="active">Shop</a>
+    <a href="#">Displays</a>
+    <a href="#">Audio</a>
+    <a href="#">Input</a>
+    <a href="#">Journal</a>
+  </nav>
+  <div class="topbar-right">
+    <button class="btn-primary">🛒 Cart (1)</button>
+  </div>
+</div>
+
+<div class="hero">
+  <h1>Shop Smarter with AI</h1>
+  <p>Your personal AI assistant helps you find the perfect tech for your workflow.</p>
+  <div class="hero-search">
+    <input class="hero-input" placeholder="Ask AI: best monitor under $500..." />
+    <button class="hero-btn">Search</button>
+  </div>
+</div>
+
+<div class="categories">
+  <div class="cat-chip active">All Products</div>
+  <div class="cat-chip">Displays</div>
+  <div class="cat-chip">Input Devices</div>
+  <div class="cat-chip">Audio</div>
+  <div class="cat-chip">Accessories</div>
+  <div class="cat-chip">Bundles</div>
+</div>
+
+<div class="main">
+  <div class="section-header">
+    <div class="section-title">Featured Products</div>
+    <div class="see-all">See all →</div>
+  </div>
+
+  <div class="products">
+    <div class="product-card">
+      <div class="product-img">🖥️</div>
+      <div class="product-info">
+        <div class="product-name">Neural Monitor Pro</div>
+        <div class="product-desc">4K, 144Hz, AI-enhanced display calibration</div>
+        <div class="product-footer">
+          <div class="product-price">$2,490</div>
+          <button class="add-btn">Add</button>
+        </div>
+      </div>
+    </div>
+    <div class="product-card">
+      <div class="product-img">🖱️</div>
+      <div class="product-info">
+        <div class="product-name">Edge Mouse</div>
+        <div class="product-desc">Precision tracking, adaptive DPI, silent clicks</div>
+        <div class="product-footer">
+          <div class="product-price">$189</div>
+          <button class="add-btn">Add</button>
+        </div>
+      </div>
+    </div>
+    <div class="product-card">
+      <div class="product-img">⌨️</div>
+      <div class="product-info">
+        <div class="product-name">Keyboard 75</div>
+        <div class="product-desc">Compact 75%, Chalk finish, tactile switches</div>
+        <div class="product-footer">
+          <div class="product-price">$329</div>
+          <button class="add-btn">Add</button>
+        </div>
+      </div>
+    </div>
+    <div class="product-card">
+      <div class="product-img">🎧</div>
+      <div class="product-info">
+        <div class="product-name">Audio Pods</div>
+        <div class="product-desc">42dB ANC, adaptive EQ, 28hr battery</div>
+        <div class="product-footer">
+          <div class="product-price">$399</div>
+          <button class="add-btn">Add</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="ai-chat">
+  <div class="chat-header">
+    <div class="chat-avatar">🤖</div>
+    <div>
+      <div class="chat-name">Atlas — AI Assistant</div>
+      <div class="chat-status">● Online</div>
+    </div>
+  </div>
+  <div class="chat-body">
+    <div class="chat-bubble">Hi! I'm Atlas, your NeuralShop AI specialist. I can help you find the perfect setup for your workflow. What are you looking for today?</div>
+  </div>
+  <div class="chat-input-row">
+    <input class="chat-input" placeholder="Ask Atlas anything..." />
+    <button class="chat-send">Send</button>
+  </div>
+</div>
+
+</body>
+</html>

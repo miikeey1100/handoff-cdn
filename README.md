@@ -62,19 +62,21 @@ The AI doesn't guess. It executes.
 
 ## Before / After
 
-**Before** — asking AI from scratch:
+![Agentic Ops comparison](examples/agentic-ops/comparison.png)
 
-> "Build me a dark dashboard with a sidebar, some cards, and a green accent"
+`claude "build me an AI agent monitoring dashboard, dark theme"` vs `npx handoff-cdn use agentic-ops | claude`
 
-→ Bootstrap-gray layout. Wrong fonts. `#22c55e` instead of `#00b872`. Border-radius 8px where spec says 4px. Generic.
+**What changed:** `#0f0f23` → `#0a0b0c`. `#22c55e` → `#00b872`. `border-radius: 12px` → `≤4px`. `box-shadow` → removed. System font → Chakra Petch. Emoji icons → monospace text. Generic sidebar → 4px baseline grid.
 
-**After** — with a Handoff-CDN bundle:
+---
 
-```bash
-npx handoff-cdn use agentic-ops | claude
-```
+![NeuralStore comparison](examples/neuralstore/comparison.png)
 
-→ `#0a0b0c` base. Chakra Petch headers. 4px baseline grid. `#00b872` one accent, never decorative. Every 1px hairline in place.
+`claude "build me an AI e-commerce store, dark theme"` vs `npx handoff-cdn use neuralstore | claude`
+
+**What changed:** Purple gradient hero → white/black Swiss grid. Rounded product cards → hairline-bordered flat cells. `#6366f1` accent → no accent (Monochrome). Emoji product images → structured placeholder grid. Generic chat widget → ATLAS panel with session ID, exact typography.
+
+---
 
 The diff is not about AI capability. It's about **what you give it**.
 
