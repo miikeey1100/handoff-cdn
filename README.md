@@ -1,161 +1,226 @@
 <div align="center">
 
-# ⬡ Handoff-CDN
+<br>
 
-### The Design-to-Code Protocol for Claude
+# Stop describing UIs to AI.<br>Give it the design instead.
 
-**Stream pixel-perfect UI bundles from a community CDN directly into Claude Code — one command.**
+<br>
 
-[![npm](https://img.shields.io/npm/v/handoff-cdn?style=for-the-badge&logo=npm&color=000&label=handoff-cdn)](https://www.npmjs.com/package/handoff-cdn)
-[![Stars](https://img.shields.io/github/stars/miikeey1100/Claude-Design-Handoff-Vault?style=for-the-badge&logo=github&color=000)](https://github.com/miikeey1100/Claude-Design-Handoff-Vault/stargazers)
-[![License](https://img.shields.io/badge/license-MIT-000?style=for-the-badge)](LICENSE)
-[![Protocol](https://img.shields.io/badge/protocol-v1.0-FFD700?style=for-the-badge)](manifest.json)
+**Handoff-CDN** is a free, open-source library of production-grade UI prototypes —  
+each one packaged as a single command that pipes a complete design brief into any AI coding tool.
 
-</div>
+<br>
 
----
+[![npm](https://img.shields.io/npm/v/handoff-cdn?style=flat-square&logo=npm&color=000&label=npm)](https://www.npmjs.com/package/handoff-cdn)
+[![Stars](https://img.shields.io/github/stars/miikeey1100/Claude-Design-Handoff-Vault?style=flat-square&logo=github&color=000)](https://github.com/miikeey1100/Claude-Design-Handoff-Vault/stargazers)
+[![License: MIT](https://img.shields.io/badge/license-MIT-000?style=flat-square)](LICENSE)
 
-## The Protocol
+<br>
 
-Handoff-CDN is not just a CLI — it's a **three-layer protocol**:
+![demo](marketing/demo.gif)
 
-```
-manifest.json          CDN registry of all design bundles
-bin/handoff-cdn.js      Fetch layer: pulls bundle, builds implementation prompt
-CLAUDE.md + SKILL.md   Contract layer: token rules Claude Code enforces automatically
-```
-
-Every bundle ships with its full HTML prototype, design-token family, and the original user intent transcript. Claude Code gets a **complete, constrained brief** — not a vague description.
-
----
-
-## Magic Command
-
-![Handoff-CDN demo](marketing/demo.gif)
+<br>
 
 ```bash
 npx handoff-cdn use aerodrop | claude
 ```
 
+<br>
+
+</div>
+
+---
+
+## The problem
+
+You ask AI to build a UI. It gives you generic gray boxes with placeholder text and wrong fonts.
+
+Not because AI can't code — because **it has nothing real to work from.**
+
+Describing a design in words loses 90% of it. Figma exports are dev-only. No one has solved the brief → code gap.
+
+---
+
+## The fix
+
+Handoff-CDN gives AI a **working HTML prototype + the original design intent + the full token contract** — all in one piped command.
+
+```
+Your words → vague output
+A Handoff-CDN bundle → pixel-accurate implementation
+```
+
+Each bundle contains:
+- A **self-contained HTML/CSS/JS prototype** (the actual design, running in a browser)
+- The **original user intent transcript** (what the designer was thinking)
+- A **design token contract** (exact colors, radii, blur, spacing — no approximations)
+- A **directive** that locks the AI to the spec and blocks token drift
+
+The AI doesn't guess. It executes.
+
+---
+
+## Before / After
+
+**Before** — asking AI from scratch:
+
+> "Build me a dark dashboard with a sidebar, some cards, and a green accent"
+
+→ Bootstrap-gray layout. Wrong fonts. `#22c55e` instead of `#00b872`. Border-radius 8px where spec says 4px. Generic.
+
+**After** — with a Handoff-CDN bundle:
+
 ```bash
-# Or with -p flag
-claude -p "$(npx handoff-cdn use luxar-vault)"
+npx handoff-cdn use agentic-ops | claude
+```
 
-# Pipe to a file, edit, then run
-npx handoff-cdn use visionsynth > brief.txt && claude < brief.txt
+→ `#0a0b0c` base. Chakra Petch headers. 4px baseline grid. `#00b872` one accent, never decorative. Every 1px hairline in place.
 
-# Browse all bundles
+The diff is not about AI capability. It's about **what you give it**.
+
+---
+
+## Quick start
+
+```bash
+# List all bundles
 npx handoff-cdn list
 
-# Install as a permanent Claude Skill
+# Pipe a design into Claude
+npx handoff-cdn use aerodrop | claude
+
+# Pipe into any AI (ChatGPT, Cursor, etc.)
+npx handoff-cdn use luxar-vault > brief.txt
+# paste brief.txt into your AI of choice
+
+# Inspect bundle metadata
+npx handoff-cdn info visionsynth
+
+# Install as a permanent project skill
 npx handoff-cdn skill install
 ```
 
-> **Record your own demo GIF:** `vhs marketing/record-demo.tape` — see [marketing/record-demo.tape](marketing/record-demo.tape)
+Works with **Claude Code, Cursor, ChatGPT, Gemini, Copilot** — any tool that accepts text input.
 
 ---
 
-## Bundle Registry — 8 Bundles, 2 Families
+## Example output
 
-### ✦ Elite Tier — 4 Flagship Bundles
+Running `npx handoff-cdn use aerodrop` streams:
 
-| Code Fidelity Preview | Bundle | Family | Fidelity | Command |
-|---|---|---|---|---|
-| ![AeroDrop](previews/comparisons/aerodrop.png) | **AeroDrop**<br>Autonomous AI Delivery | Liquid Glass | **99% CSS Match** | `npx handoff-cdn use aerodrop` |
-| ![Agentic Ops](previews/comparisons/agentic-ops.png) | **Agentic Ops**<br>Swarm Console | Monochrome | **97% CSS Match** | `npx handoff-cdn use agentic-ops` |
-| ![Luxar Vault](previews/comparisons/luxar-vault.png) | **Luxar Vault**<br>AI Crypto Wallet | Liquid Glass | **98% CSS Match** | `npx handoff-cdn use luxar-vault` |
-| ![VisionSynth](previews/comparisons/visionsynth.png) | **VisionSynth**<br>AI Video Generator | Liquid Glass | **97% CSS Match** | `npx handoff-cdn use visionsynth` |
+```
+══════════════════════════════════════════════════════
+  Handoff-CDN · aerodrop · v1.0
+  AeroDrop — Autonomous AI Delivery Network
+  Family: Liquid Glass  ·  Tokens: 47  ·  CDN: GitHub Raw
+══════════════════════════════════════════════════════
 
-### ◆ Extended Library — 4 Additional Bundles
+## Original Design Intent
+[60 lines from the designer's actual session transcript]
 
-| Preview | Bundle | Family | Fidelity | Command |
-|---|---|---|---|---|
-| ![BioPulse](previews/biopulse.png) | **BioPulse** — AI Health Tracker | Liquid Glass | 96% | `npx handoff-cdn use biopulse` |
-| ![NeuralStore](previews/neuralstore.png) | **NeuralStore** — Engineered for Signal | Monochrome | 96% | `npx handoff-cdn use neuralstore` |
-| ![Orchestrator](previews/orchestrator.png) | **Orchestrator** — LogicChain | Monochrome | 95% | `npx handoff-cdn use orchestrator` |
-| ![Frontier](previews/frontier.png) | **Frontier** — AI-native IDE | Monochrome | 94% | `npx handoff-cdn use frontier` |
+## Token Contract (enforced — do not approximate)
+--glass-bg-0:  oklch(0.09 0.04 260)   ← not #0a0f1a
+--glass-panel: oklch(1 0 0 / 0.04)    ← not rgba(255,255,255,0.04)
+--blur-md:     16px                   ← not 12px, not 20px
+--radius-lg:   24px                   ← not 20px, not 1.5rem
+[full token block]
 
-### What is Fidelity Score?
+## Primary Design File: AeroDrop.html
+[complete HTML source — self-contained, 27KB]
 
-Each score is an honest assessment of the prompt's completeness against the original design: **color token coverage** (oklch values, not approximations), **layout accuracy** (spacing, radii, blur), **type fidelity** (weights, tracking, font stacks), and **interactive state coverage**. 99% = every token, every state, nothing left to guesswork.
+## Implementation Directive
+You are implementing a Handoff-CDN bundle. Rules:
+- Pixel-accurate fidelity is the only acceptable outcome
+- Preserve all oklch() values — converting to hex breaks the spec
+- Match every border-radius, blur, spacing, and type token exactly
+- Do not simplify, omit, or "improve" the design
+```
 
 ---
 
-## Design Families
+## Bundle Registry
 
-Every Handoff-CDN bundle belongs to one of two families. Mixing is explicitly banned in [CLAUDE.md](CLAUDE.md).
+### Flagship — 4 Elite Bundles
 
-| | ✦ Liquid Glass | ◆ Monochrome |
+| Preview | Bundle | Design Family | Command |
+|---|---|---|---|
+| ![AeroDrop](previews/comparisons/aerodrop.png) | **AeroDrop**<br><sub>Autonomous AI delivery network · iOS frame · 3D map · glass agent cards</sub> | Liquid Glass | `npx handoff-cdn use aerodrop` |
+| ![Agentic Ops](previews/comparisons/agentic-ops.png) | **Agentic Ops**<br><sub>AI swarm orchestration console · live agent grid · terminal log</sub> | Monochrome | `npx handoff-cdn use agentic-ops` |
+| ![Luxar Vault](previews/comparisons/luxar-vault.png) | **Luxar Vault**<br><sub>AI-native crypto wallet · smart swap interface · glass panels</sub> | Liquid Glass | `npx handoff-cdn use luxar-vault` |
+| ![VisionSynth](previews/comparisons/visionsynth.png) | **VisionSynth**<br><sub>AI video generation studio · timeline · glass cards · model selector</sub> | Liquid Glass | `npx handoff-cdn use visionsynth` |
+
+### Extended Library — 4 More Bundles
+
+| Bundle | Design Family | Command |
 |---|---|---|
-| Surface | `oklch(0.09 0.04 260)` + radial wash | `#0a0b0c` flat, hairline grids |
-| Panel | `oklch(1 0 0 / 0.04)` + `blur(16px)` | `#111315`, no blur |
-| Stroke | `oklch(1 0 0 / 0.10)` | `#23282d`, 1px only |
-| Type | SF Pro Display / Space Grotesk | Chakra Petch / Space Grotesk |
-| Mono | JetBrains Mono | JetBrains Mono |
-| Radius | 10 / 16 / 24 / 32px | 0–6px only |
-| Accent | Wash-driven, no single token | `#00b872` — one, earned |
-| Baseline | 8px | 4px strict |
+| **BioPulse** — AI health & vitals tracker | Liquid Glass | `npx handoff-cdn use biopulse` |
+| **NeuralStore** — AI-specialist e-commerce | Monochrome | `npx handoff-cdn use neuralstore` |
+| **Orchestrator** — Logic chain workflow builder | Monochrome | `npx handoff-cdn use orchestrator` |
+| **Frontier** — AI-native IDE interface | Monochrome | `npx handoff-cdn use frontier` |
 
 ---
 
-## Install as a Permanent Claude Skill
+## Design families
 
-```bash
-npx handoff-cdn skill install
+Every bundle belongs to exactly one of two token families. The AI enforces this automatically.
+
+### Liquid Glass
+Frosted surfaces. oklch depth. Backdrop blur. 10–32px radii.  
+**Used by:** AeroDrop · Luxar Vault · VisionSynth · BioPulse
+
+### Monochrome
+Silver-ink ladder. 4px baseline. Hairline grids. One accent — `#00b872` — never decorative.  
+**Used by:** Agentic Ops · Orchestrator · NeuralStore · Frontier
+
+Mixing families in one project is explicitly banned. The token contract enforces it.
+
+---
+
+## How it works
+
+```
+1. FETCH    npx handoff-cdn pulls the bundle from GitHub Raw (zero install)
+2. BUILD    CLI assembles: intent transcript + token contract + full HTML + directive
+3. PIPE     Structured prompt streams to your AI — it implements, not interprets
 ```
 
-This writes the Handoff-CDN token contract into your `./CLAUDE.md`. Every Claude Code session in that directory will automatically enforce fidelity rules — no flags, no reminders.
-
-See [SKILL.md](SKILL.md) for manual install, what the skill enforces, and how to uninstall.
+No accounts. No API keys. No build step. No runtime dependencies.  
+The CLI is 200 lines of Node built-ins. [Read it.](bin/handoff-cdn.js)
 
 ---
 
-## Protocol Internals
+## Contribute a bundle
+
+Have a Claude Design export? Add it.
 
 ```bash
-# Inspect the CDN registry
-npx handoff-cdn manifest
-
-# Get metadata + preview URL for a specific bundle
-npx handoff-cdn info aerodrop
+git clone https://github.com/miikeey1100/Claude-Design-Handoff-Vault
+# drop your bundle under bundles/<slug>/
+# add entry to manifest.json
+# npm run capture && npm run compare
+# open a PR
 ```
 
-The [`manifest.json`](manifest.json) is machine-readable and stable — build on top of it.
+Full guide: [CONTRIBUTING.md](CONTRIBUTING.md)
+
+**Rule:** one family per bundle. No mixing. A PR with mixed tokens gets closed.
 
 ---
 
-## ⭐ Star for the Anthropic OSS Grant
+## ⭐ Star this
 
-Handoff-CDN runs on GitHub Raw as a free community CDN. To keep it open-source and fund the next phase, we're applying for the **Anthropic OSS Grant**.
+If Handoff-CDN saves you an hour of prompt-wrestling, star it.
 
-**Goal: 5,000 stars → grant application.**
+Stars help surface this to the developers who need it — and fund the next 24 bundles.
 
-The grant funds:
-- `npx handoff-cdn new` — export your own Claude Design bundle to the CDN
-- CLI auto-update when new bundles drop (`npx handoff-cdn update`)
-- GitHub Action: auto-regenerate comparison previews on every PR
-- 32 total bundles by EOY (currently 8)
-
-[**⭐ Star Handoff-CDN now**](https://github.com/miikeey1100/Claude-Design-Handoff-Vault/stargazers) — every star is a vote for a free, open design-to-code infrastructure.
-
----
-
-## Contributing a Bundle
-
-1. Export from [claude.ai/design](https://claude.ai/design) → drop into `bundles/<slug>/`
-2. Pick a family (Liquid Glass or Monochrome) — see [CLAUDE.md](CLAUDE.md)
-3. Add an entry to [`manifest.json`](manifest.json)
-4. Add a row to the `bin/handoff-cdn.js` fetch map (if needed)
-5. `npm run compare` — commit the new fidelity screenshot
-6. Add a row to the gallery above
-7. Open a PR
+**[⭐ Star on GitHub](https://github.com/miikeey1100/Claude-Design-Handoff-Vault)**
 
 ---
 
 <div align="center">
 
-MIT licensed · designs by [claude.ai/design](https://claude.ai/design) · protocol by [miikeey1100](https://github.com/miikeey1100)
+MIT · built by [miikeey1100](https://github.com/miikeey1100) · designs from [claude.ai/design](https://claude.ai/design)
 
-**[manifest.json](manifest.json) · [CLAUDE.md](CLAUDE.md) · [SKILL.md](SKILL.md) · [marketing/](marketing/)**
+[manifest.json](manifest.json) · [CLAUDE.md](CLAUDE.md) · [SKILL.md](SKILL.md) · [CONTRIBUTING.md](CONTRIBUTING.md)
 
 </div>
