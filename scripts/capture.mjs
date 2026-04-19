@@ -32,7 +32,7 @@ const BUNDLES = [
   { slug: 'visionsynth',  dir: 'visionsynth',        file: 'VisionSynth.html' },
 ];
 
-const VIEWPORT = { width: 1600, height: 1000 };
+const VIEWPORT = { width: 1920, height: 1080 };
 
 await mkdir(previewsDir, { recursive: true });
 

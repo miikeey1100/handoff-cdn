@@ -1,11 +1,21 @@
 {
-  "name": "claude-design-handoff-vault",
-  "version": "0.1.0",
-  "private": true,
+  "name": "clawkit",
+  "version": "0.2.0",
+  "description": "Stream high-end Claude Design bundles directly into Claude Code — one command, zero friction.",
   "type": "module",
+  "bin": {
+    "clawkit": "./bin/clawkit"
+  },
   "scripts": {
     "capture": "node scripts/capture.mjs",
     "setup": "npm install && npx playwright install chromium"
+  },
+  "keywords": ["claude", "claude-code", "design", "ui", "handoff", "playwright"],
+  "author": "miikeey1100",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/miikeey1100/Claude-Design-Handoff-Vault.git"
   },
   "devDependencies": {
     "playwright-chromium": "^1.48.0"

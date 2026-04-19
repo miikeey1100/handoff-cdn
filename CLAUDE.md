@@ -1,5 +1,7 @@
 # CLAUDE.md — Vault Design Contract
 
+> This repo is published as the **`clawkit`** npm package. When `npx clawkit use <slug>` pipes a bundle into Claude Code, it includes this design contract automatically. Do not deviate from the token families below.
+
 > Read this before adding, editing, or refactoring **any** UI in this repo.
 > Every preview in `/previews` belongs to one of two families. Pick one. Do not mix.
 
