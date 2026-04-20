@@ -225,7 +225,72 @@
     font-size: 15px;
     color: var(--ink-70);
   }
-  .delta strong { color: var(--good); font-size: 20px; font-weight: 700; }
+  .delta strong {
+    color: var(--good);
+    font-size: 28px;
+    font-weight: 700;
+    text-shadow: 0 0 24px oklch(0.72 0.18 150 / 0.5);
+    display: inline-block;
+    animation: deltaPop 0.5s cubic-bezier(.2,.8,.2,1);
+  }
+  @keyframes deltaPop { from { transform: scale(0.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+  /* Winner glow — applied via JS to the winning lane card */
+  .lane.winner {
+    box-shadow: 0 0 0 1px oklch(0.72 0.18 150 / 0.4), 0 0 40px oklch(0.72 0.18 150 / 0.3);
+    transition: box-shadow 0.6s ease-out;
+  }
+  .lane.winner::after {
+    content: "★ WINNER";
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    background: var(--good);
+    color: #06120f;
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    z-index: 10;
+    animation: winnerFade 0.4s ease-out;
+  }
+  @keyframes winnerFade { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+  .lane { position: relative; }
+
+  /* Cinematic countdown overlay — shown for ~3s before race starts */
+  .countdown {
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: oklch(0 0 0 / 0.85);
+    backdrop-filter: blur(12px);
+    z-index: 9999;
+    font-family: var(--mono);
+  }
+  .countdown.on { display: flex; }
+  .countdown-num {
+    font-size: 220px;
+    font-weight: 800;
+    color: var(--ink-100);
+    letter-spacing: -0.05em;
+    line-height: 1;
+    text-shadow: 0 0 60px oklch(0.72 0.18 150 / 0.4);
+    animation: countPop 1s cubic-bezier(.2,.8,.2,1);
+  }
+  .countdown-num.go {
+    color: var(--good);
+    font-size: 160px;
+    letter-spacing: 0.05em;
+  }
+  @keyframes countPop {
+    0%   { transform: scale(0.4); opacity: 0; }
+    40%  { transform: scale(1.1); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+  }
 
   .examples { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; justify-content: center; }
   .examples button {
@@ -262,6 +327,7 @@
 <body>
 
 <header>
+  <div id="countdown" class="countdown"><div id="countdown-num" class="countdown-num">3</div></div>
   <div class="brand"><span class="dot"></span>Handoff-CDN Arena<em>&nbsp;·&nbsp;live fidelity race</em></div>
   <nav>
     <a href="https://github.com/miikeey1100/handoff-cdn" target="_blank">GitHub</a>
@@ -291,7 +357,7 @@
   </div>
 
   <section class="arena" style="margin-top:24px;">
-    <div class="lane">
+    <div class="lane a">
       <div class="lane-head">
         <div class="lane-title"><span class="chip a">LANE A</span> Plain Opus 4.7</div>
         <div class="lane-score">
@@ -303,7 +369,7 @@
         <div class="lane-placeholder">Awaiting prompt…<div class="hint">just the prompt, no design contract</div></div>
       </div>
     </div>
-    <div class="lane">
+    <div class="lane b">
       <div class="lane-head">
         <div class="lane-title"><span class="chip b">LANE B</span> Opus 4.7 + Handoff-CDN</div>
         <div class="lane-score">
@@ -431,6 +497,29 @@ function startLiveBar(which, estSeconds = 45) {
   }};
 }
 
+function runCountdown() {
+  return new Promise(resolve => {
+    const overlay = $('countdown');
+    const num = $('countdown-num');
+    overlay.classList.add('on');
+    const steps = [
+      { t: 0,    text: '3', cls: '' },
+      { t: 900,  text: '2', cls: '' },
+      { t: 1800, text: '1', cls: '' },
+      { t: 2700, text: 'GO', cls: 'go' },
+    ];
+    steps.forEach(s => setTimeout(() => {
+      num.textContent = s.text;
+      num.className = 'countdown-num ' + s.cls;
+      // re-trigger animation
+      num.style.animation = 'none';
+      void num.offsetWidth;
+      num.style.animation = '';
+    }, s.t));
+    setTimeout(() => { overlay.classList.remove('on'); resolve(); }, 3600);
+  });
+}
+
 async function race() {
   const prompt = $('prompt').value.trim();
   const slug = $('bundle').value;
@@ -441,6 +530,11 @@ async function race() {
   $('report').classList.remove('on');
   $('score-a').textContent = '—';
   $('score-b').textContent = '—';
+  // Strip prior winner state
+  document.querySelectorAll('.lane').forEach(l => l.classList.remove('winner'));
+
+  // Cinematic countdown — adds ~3.6s of anticipation, great for demo video
+  await runCountdown();
 
   setLaneLoading('a', 'Plain Opus 4.7 generating…');
   setLaneLoading('b', 'Opus 4.7 + Handoff-CDN generating…');
@@ -486,6 +580,9 @@ async function race() {
       : delta === 0
         ? `Both lanes scored identically.`
         : `Plain 4.7 scored higher by ${-delta} points (rare — check the bundle).`;
+    // Light up the winning lane card with a glow + WINNER badge (CSS handles the rest)
+    const winner = rB.score > rA.score ? 'b' : rA.score > rB.score ? 'a' : null;
+    if (winner) document.querySelector('.lane.' + winner)?.classList.add('winner');
   }
   $('race').disabled = false;
 }
