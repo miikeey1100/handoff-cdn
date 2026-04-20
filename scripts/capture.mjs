@@ -21,16 +21,14 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, '..');
 const previewsDir = path.join(root, 'previews');
 
-const BUNDLES = [
-  { slug: 'aerodrop',     dir: 'aerodrop-luxury-ui', file: 'AeroDrop.html' },
-  { slug: 'agentic-ops',  dir: 'agentic-ops',        file: 'Agentic Ops.html' },
-  { slug: 'biopulse',     dir: 'biopulse-ai',        file: 'BioPulse.html' },
-  { slug: 'luxar-vault',  dir: 'holowallet',         file: 'Luxar Vault.html' },
-  { slug: 'orchestrator', dir: 'logicchain',         file: 'Orchestrator.html' },
-  { slug: 'neuralstore',  dir: 'neuralstore',        file: 'NeuralStore.html' },
-  { slug: 'frontier',     dir: 'vibe-design',        file: 'Frontier Landing.html' },
-  { slug: 'visionsynth',  dir: 'visionsynth',        file: 'VisionSynth.html' },
-];
+// Derive bundles from manifest.json (single source of truth)
+const manifest = JSON.parse(await readFile(path.join(root, 'manifest.json'), 'utf8'));
+const BUNDLES = manifest.bundles.map(b => {
+  const rel = b.dir.replace(/^bundles\//, '');
+  const [, ...rest] = b.primary.split('/');
+  const file = rest.join('/');
+  return { slug: b.slug, dir: rel, file };
+});
 
 const VIEWPORT = { width: 1920, height: 1080 };
 

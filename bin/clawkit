@@ -13,6 +13,12 @@ const BUNDLES = {
   'neuralstore':  { dir: 'neuralstore',        file: 'NeuralStore.html',      family: 'Monochrome',   title: 'NeuralStore — Engineered for Signal',  fidelity: '96%' },
   'frontier':     { dir: 'vibe-design',        file: 'Frontier Landing.html', family: 'Monochrome',   title: 'Frontier — The AI-native IDE',         fidelity: '94%' },
   'visionsynth':  { dir: 'visionsynth',        file: 'VisionSynth.html',      family: 'Liquid Glass', title: 'VisionSynth — AI Video Generator',     fidelity: '97%' },
+  'spectra-chat': { dir: 'spectra-chat',       file: 'SpectraChat.html',      family: 'Liquid Glass', title: 'SpectraChat — AI-Native Chat',         fidelity: '97%' },
+  'crystalpay':   { dir: 'crystalpay',         file: 'CrystalPay.html',       family: 'Liquid Glass', title: 'CrystalPay — AI Payment Dashboard',    fidelity: '96%' },
+  'auroramail':   { dir: 'auroramail',         file: 'AuroraMail.html',       family: 'Liquid Glass', title: 'AuroraMail — AI-Native Email Client',  fidelity: '96%' },
+  'tradepulse':   { dir: 'tradepulse',         file: 'TradePulse.html',       family: 'Monochrome',   title: 'TradePulse — Trading Terminal',        fidelity: '97%' },
+  'shiptrack':    { dir: 'shiptrack',          file: 'ShipTrack.html',        family: 'Monochrome',   title: 'ShipTrack — Logistics Operations',     fidelity: '95%' },
+  'sentrygrid':   { dir: 'sentrygrid',         file: 'SentryGrid.html',       family: 'Monochrome',   title: 'SentryGrid — Security Ops Console',    fidelity: '96%' },
 };
 
 const TOKENS = {

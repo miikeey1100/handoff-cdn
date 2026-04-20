@@ -165,7 +165,7 @@ You are implementing a Handoff-CDN bundle. Rules:
 
 ---
 
-## Bundle Registry — 12 Bundles
+## Bundle Registry — 14 Bundles
 
 ### ✦ Liquid Glass
 
@@ -177,6 +177,7 @@ You are implementing a Handoff-CDN bundle. Rules:
 | ![SpectraChat](previews/comparisons/spectra-chat.png) | **SpectraChat**<br><sub>AI-native chat · glass message bubbles · code blocks · streaming indicator</sub> | `npx handoff-cdn use spectra-chat` |
 | ![CrystalPay](previews/comparisons/crystalpay.png) | **CrystalPay**<br><sub>AI payment dashboard · balance card · Atlas AI insights · spending chart</sub> | `npx handoff-cdn use crystalpay` |
 | ![BioPulse](previews/biopulse.png) | **BioPulse**<br><sub>AI health tracker · biometric rings · vitals panels · activity timeline</sub> | `npx handoff-cdn use biopulse` |
+| ![AuroraMail](previews/comparisons/auroramail.png) | **AuroraMail**<br><sub>AI-native email · Atlas summary panel · priority inbox · aurora→violet accents</sub> | `npx handoff-cdn use auroramail` |
 
 ### ◆ Monochrome
 
@@ -188,6 +189,7 @@ You are implementing a Handoff-CDN bundle. Rules:
 | ![NeuralStore](previews/comparisons/neuralstore.png) | **NeuralStore**<br><sub>AI e-commerce · Swiss editorial grid · "Engineered for signal."</sub> | `npx handoff-cdn use neuralstore` |
 | ![Orchestrator](previews/orchestrator.png) | **Orchestrator**<br><sub>AI workflow builder · pipeline graph · agent node editor · execution log</sub> | `npx handoff-cdn use orchestrator` |
 | ![Frontier](previews/frontier.png) | **Frontier**<br><sub>AI-native IDE landing page · editor mockup · feature grid · terminal footer</sub> | `npx handoff-cdn use frontier` |
+| ![SentryGrid](previews/comparisons/sentrygrid.png) | **SentryGrid**<br><sub>Security ops console · live threat feed · agent grid · incident timeline (MTTR 3m 42s)</sub> | `npx handoff-cdn use sentrygrid` |
 
 ---
 
