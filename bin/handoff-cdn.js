@@ -89,15 +89,28 @@ function get(url) {
 }
 
 // Anthropic Messages API — zero-dep, uses ANTHROPIC_API_KEY env var
-function callAnthropic({ system, user, model, maxTokens = 8192 }) {
+// images: [{ mediaType: 'image/png', data: <base64 string> }, ...]
+function callAnthropic({ system, user, model, maxTokens = 8192, images = [] }) {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) throw new Error('ANTHROPIC_API_KEY not set. Get one at https://platform.claude.com/settings/keys');
   const selected = model || process.env.HANDOFF_MODEL || 'claude-opus-4-7-20250101';
+
+  // Build content: if images present, produce a content-block array; else plain string
+  const content = images.length
+    ? [
+        ...images.map(img => ({
+          type: 'image',
+          source: { type: 'base64', media_type: img.mediaType || 'image/png', data: img.data },
+        })),
+        { type: 'text', text: user },
+      ]
+    : user;
+
   const payload = JSON.stringify({
     model: selected,
     max_tokens: maxTokens,
     system,
-    messages: [{ role: 'user', content: user }],
+    messages: [{ role: 'user', content }],
   });
   return new Promise((resolve, reject) => {
     const req = https.request('https://api.anthropic.com/v1/messages', {
@@ -131,6 +144,77 @@ function callAnthropic({ system, user, model, maxTokens = 8192 }) {
 function stripFences(s) {
   const m = s.trim().match(/^```(?:json)?\s*\n([\s\S]*?)\n```\s*$/);
   return m ? m[1] : s.trim();
+}
+
+// Fetch binary (PNG) from URL → base64 string
+function getBinary(url) {
+  return new Promise((resolve, reject) => {
+    https.get(url, res => {
+      if (res.statusCode === 301 || res.statusCode === 302)
+        return getBinary(res.headers.location).then(resolve, reject);
+      if (res.statusCode !== 200)
+        return reject(new Error(`HTTP ${res.statusCode}: ${url}`));
+      const buf = [];
+      res.on('data', c => buf.push(c));
+      res.on('end', () => resolve(Buffer.concat(buf).toString('base64')));
+    }).on('error', reject);
+  });
+}
+
+// Serve one HTML file from a transient http server on an ephemeral port.
+// Returns { url, stop } — URL is http://localhost:<port>/.
+async function serveHtmlOnce(htmlContent) {
+  return new Promise((resolve) => {
+    const srv = http.createServer((req, res) => {
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+      res.end(htmlContent);
+    });
+    srv.listen(0, '127.0.0.1', () => {
+      const port = srv.address().port;
+      resolve({ url: `http://127.0.0.1:${port}/`, stop: () => srv.close() });
+    });
+  });
+}
+
+// Playwright screenshot — dynamic import, keeps core zero-dep for non-visual flows.
+async function captureScreenshot(sourceUrl) {
+  let chromium;
+  try { ({ chromium } = await import('playwright-chromium')); }
+  catch {
+    throw new Error('playwright-chromium not installed.\n  Run: npm i -D playwright-chromium && npx playwright install chromium');
+  }
+  const browser = await chromium.launch();
+  try {
+    const ctx = await browser.newContext({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 1 });
+    const page = await ctx.newPage();
+    await page.goto(sourceUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForTimeout(2000);
+    const buf = await page.screenshot({ type: 'png', fullPage: false });
+    return buf.toString('base64');
+  } finally {
+    await browser.close();
+  }
+}
+
+// Render an ASCII heatmap from region descriptors.
+// Grid: 14 rows × 40 cols. severity 0=·  1=░  2=▒  3=▓  4=█
+function renderHeatmap(regions, width = 40, height = 14) {
+  const grid = Array.from({ length: height }, () => Array(width).fill(0));
+  for (const r of regions || []) {
+    const row = Math.max(0, Math.min(height - 1, r.row | 0));
+    const c0 = Math.max(0, Math.min(width - 1, r.col_start | 0));
+    const c1 = Math.max(c0, Math.min(width - 1, r.col_end | 0));
+    const sev = Math.max(0, Math.min(4, r.severity | 0));
+    for (let c = c0; c <= c1; c++) grid[row][c] = Math.max(grid[row][c], sev);
+  }
+  const glyphs = [' ', '░', '▒', '▓', '█'];
+  const top = '  ┌' + '─'.repeat(width) + '┐';
+  const bot = '  └' + '─'.repeat(width) + '┘';
+  const annotation = (regions || []).slice(0, 6).map((r, i) => {
+    const sym = { 1: '░', 2: '▒', 3: '▓', 4: '█' }[r.severity] || '·';
+    return `  ${sym} ${r.issue}`;
+  }).join('\n');
+  return [top, ...grid.map(row => '  │' + row.map(v => glyphs[v]).join('') + '│'), bot, '', annotation].join('\n');
 }
 
 async function loadManifest() {
@@ -178,7 +262,7 @@ Handoff-CDN — The Design-to-Code Protocol  v${VERSION}
   npx handoff-cdn doctor                Diagnose setup (node, CDN, API, claude)
 
 Powered by Opus 4.7 (requires ANTHROPIC_API_KEY):
-  npx handoff-cdn grade <file> --against <slug>    Score UI fidelity vs contract
+  npx handoff-cdn grade <file> --against <slug> [--visual]   Code + visual regression
   npx handoff-cdn forge "<prompt>"                 Generate a new bundle from a prompt
   npx handoff-cdn arena                            Live split-screen demo: 4.7 vs 4.7+Handoff
 
@@ -593,9 +677,10 @@ if (cmd === 'doctor') {
 if (cmd === 'grade') {
   const againstIdx = args.indexOf('--against');
   const slug = againstIdx >= 0 ? args[againstIdx + 1] : null;
+  const visual = args.includes('--visual');
   const file = args.find(a => a && !a.startsWith('--') && a !== slug);
   if (!file || !slug || !bySlug[slug]) {
-    stderr.write('Usage: handoff-cdn grade <file-or-url> --against <slug>\n');
+    stderr.write('Usage: handoff-cdn grade <file-or-url> --against <slug> [--visual]\n');
     stderr.write(`Available slugs: ${slugList}\n`);
     exit(1);
   }
@@ -605,10 +690,12 @@ if (cmd === 'grade') {
     userCode = file.startsWith('http') ? await get(file) : await fs.readFile(file, 'utf8');
   } catch (e) { stderr.write(`Cannot read ${file}: ${e.message}\n`); exit(1); }
 
-  stderr.write(`⚖  Grading ${file}\n   against: ${slug} (${b.family})\n   model: Opus 4.7...\n\n`);
+  stderr.write(`⚖  Grading ${file}\n   against: ${slug} (${b.family})\n   mode: ${visual ? 'code + visual (Playwright + Opus vision)' : 'code-only'}\n   model: Opus 4.7...\n\n`);
 
   const refHtml = await get(`${manifest.cdn}/${b.dir}/${b.primary}`).catch(() => '');
-  const system = `You are a strict design-fidelity grader for Handoff-CDN. Compare the user's implementation to the reference design contract. Return STRICTLY VALID JSON — no preamble, no code fences — matching:
+
+  // ── Code pass (always runs) ───────────────────────────────
+  const codeSystem = `You are a strict design-fidelity grader for Handoff-CDN. Compare the user's implementation to the reference design contract. Return STRICTLY VALID JSON — no preamble, no code fences — matching:
 {
   "score": <integer 0-100>,
   "family": "${b.family}",
@@ -626,7 +713,7 @@ Scoring rubric:
 - missing hairline strokes = LOW (-2)
 Start at 100, subtract. Floor at 0.`;
 
-  const user = `## Target family: ${b.family}
+  const codeUser = `## Target family: ${b.family}
 ## Token contract:
 ${TOKENS[b.family]}
 
@@ -642,29 +729,102 @@ ${userCode.slice(0, 24000)}
 
 Return the JSON fidelity report now.`;
 
-  let result;
-  try { result = await callAnthropic({ system, user, maxTokens: 4096 }); }
-  catch (e) { stderr.write(`Grader failed: ${e.message}\n`); exit(1); }
+  // ── Visual pass (Playwright + vision, if --visual) ────────
+  let visualReport = null;
+  let visualErr = null;
+  if (visual) {
+    try {
+      stderr.write(`  → capturing screenshot (Playwright, 1920×1080)...\n`);
+      let captureUrl;
+      let stopServer = () => {};
+      if (file.startsWith('http')) {
+        captureUrl = file;
+      } else {
+        const served = await serveHtmlOnce(userCode);
+        captureUrl = served.url;
+        stopServer = served.stop;
+      }
+      const candB64 = await captureScreenshot(captureUrl);
+      stopServer();
+
+      stderr.write(`  → fetching reference preview from CDN...\n`);
+      const refB64 = await getBinary(`${manifest.cdn}/${b.preview}`);
+
+      stderr.write(`  → invoking Opus 4.7 vision...\n`);
+      const visSystem = `You are a visual-fidelity grader. You compare REFERENCE and CANDIDATE screenshots of the same UI concept against a token contract. Return STRICTLY VALID JSON:
+{
+  "visual_score": <integer 0-100>,
+  "summary": "<one sentence>",
+  "regions": [
+    {"row": <0-13>, "col_start": <0-39>, "col_end": <0-39>, "severity": <1-4>, "issue": "<short>"}
+  ]
+}
+Grid: 14 rows × 40 columns covering the full frame. Each region marks a visual deviation band.
+Severity: 1=minor tint drift, 2=spacing/radius off, 3=wrong color family, 4=structural difference.
+Max 12 regions. Start visual_score at 100, subtract roughly (severity × 3 × columns_affected/10). Floor at 0.
+IMPORTANT: The first image is REFERENCE (gold). The second image is CANDIDATE (being graded).`;
+      const visUser = `## Family: ${b.family}
+## Contract:
+${TOKENS[b.family]}
+
+Grade the CANDIDATE screenshot against the REFERENCE. Return JSON.`;
+
+      const visOut = await callAnthropic({
+        system: visSystem,
+        user: visUser,
+        maxTokens: 2000,
+        images: [
+          { mediaType: 'image/png', data: refB64 },
+          { mediaType: 'image/png', data: candB64 },
+        ],
+      });
+      try { visualReport = JSON.parse(stripFences(visOut)); }
+      catch { visualErr = 'vision grader returned non-JSON'; }
+    } catch (e) { visualErr = e.message; }
+  }
+
+  let codeResult;
+  try { codeResult = await callAnthropic({ system: codeSystem, user: codeUser, maxTokens: 4096 }); }
+  catch (e) { stderr.write(`Code grader failed: ${e.message}\n`); exit(1); }
 
   let report;
-  try { report = JSON.parse(stripFences(result)); }
-  catch { stderr.write('Grader returned non-JSON:\n' + result.slice(0, 800) + '\n'); exit(1); }
+  try { report = JSON.parse(stripFences(codeResult)); }
+  catch { stderr.write('Code grader returned non-JSON:\n' + codeResult.slice(0, 800) + '\n'); exit(1); }
 
-  const score = Math.max(0, Math.min(100, report.score || 0));
-  const filled = Math.round(score / 5);
+  const codeScore = Math.max(0, Math.min(100, report.score || 0));
+  const visScore = visualReport ? Math.max(0, Math.min(100, visualReport.visual_score || 0)) : null;
+  const finalScore = visScore != null
+    ? Math.round(codeScore * 0.4 + visScore * 0.6)
+    : codeScore;
+  const filled = Math.round(finalScore / 5);
   const bar = '█'.repeat(filled) + '░'.repeat(20 - filled);
-  const grade = score >= 90 ? 'A' : score >= 80 ? 'B' : score >= 70 ? 'C' : score >= 60 ? 'D' : 'F';
+  const grade = finalScore >= 90 ? 'A' : finalScore >= 80 ? 'B' : finalScore >= 70 ? 'C' : finalScore >= 60 ? 'D' : 'F';
 
   stdout.write(`\n╔═══════════════════════════════════════════════════╗\n`);
   stdout.write(`║  Handoff-CDN Fidelity Report                      ║\n`);
   stdout.write(`║  ${slug.padEnd(18)}  ${b.family.padEnd(15)}        ║\n`);
   stdout.write(`╚═══════════════════════════════════════════════════╝\n\n`);
-  stdout.write(`  Score:   ${score}/100  [${grade}]\n`);
+  stdout.write(`  Final Score:   ${finalScore}/100  [${grade}]\n`);
   stdout.write(`  ${bar}\n\n`);
-  stdout.write(`  ${report.summary || ''}\n\n`);
+  if (visScore != null) {
+    stdout.write(`    • Code fidelity:    ${codeScore}/100  (×0.4)\n`);
+    stdout.write(`    • Visual fidelity:  ${visScore}/100  (×0.6)\n\n`);
+  }
+  stdout.write(`  ${report.summary || ''}\n`);
+  if (visualReport?.summary) stdout.write(`  ${visualReport.summary}\n`);
+  stdout.write('\n');
+
+  // Visual heatmap
+  if (visualReport?.regions?.length) {
+    stdout.write(`  Visual Heatmap  (14 × 40 grid, severity intensity):\n\n`);
+    stdout.write(renderHeatmap(visualReport.regions));
+    stdout.write('\n\n');
+  } else if (visual && visualErr) {
+    stdout.write(`  ⚠ Visual pass failed: ${visualErr}\n\n`);
+  }
 
   if (report.violations?.length) {
-    stdout.write(`  ✗ Violations (${report.violations.length}):\n`);
+    stdout.write(`  ✗ Code Violations (${report.violations.length}):\n`);
     for (const v of report.violations) {
       const icon = v.severity === 'high' ? '🔴' : v.severity === 'med' ? '🟡' : '🟢';
       const loc = v.line ? ` (line ${v.line})` : '';
@@ -673,12 +833,12 @@ Return the JSON fidelity report now.`;
     stdout.write('\n');
   }
   if (report.matches?.length) {
-    stdout.write(`  ✓ Matches (${report.matches.length}):\n`);
+    stdout.write(`  ✓ Code Matches (${report.matches.length}):\n`);
     for (const m of report.matches.slice(0, 6)) stdout.write(`    · ${m.token}: ${m.detail}\n`);
     if (report.matches.length > 6) stdout.write(`    · … and ${report.matches.length - 6} more\n`);
     stdout.write('\n');
   }
-  exit(score >= 70 ? 0 : 1);
+  exit(finalScore >= 70 ? 0 : 1);
 }
 
 // ── forge ─────────────────────────────────────────────────────────────────────
