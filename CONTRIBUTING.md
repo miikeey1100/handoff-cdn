@@ -5,8 +5,8 @@ Thanks for adding to the protocol. Here's how to submit a bundle.
 ## Quick path
 
 ```bash
-git clone https://github.com/miikeey1100/Claude-Design-Handoff-Vault
-cd Claude-Design-Handoff-Vault
+git clone https://github.com/miikeey1100/handoff-cdn
+cd handoff-cdn
 npm run setup                    # installs playwright-chromium
 ```
 

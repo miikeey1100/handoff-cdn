@@ -10,7 +10,7 @@ import { execSync } from 'node:child_process';
 import readline from 'node:readline';
 
 const VERSION = '1.0.0';
-const CDN = 'https://raw.githubusercontent.com/miikeey1100/Claude-Design-Handoff-Vault/main';
+const CDN = 'https://raw.githubusercontent.com/miikeey1100/handoff-cdn/main';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const LOCAL_MANIFEST = path.resolve(__dirname, '..', 'manifest.json');
 
@@ -69,10 +69,10 @@ ${family === 'Liquid Glass' ? `## Liquid Glass rules
 --s-6: 24px; --s-8: 32px;
 \`\`\``}
 
-Full contract: https://github.com/miikeey1100/Claude-Design-Handoff-Vault/blob/main/CLAUDE.md
+Full contract: https://github.com/miikeey1100/handoff-cdn/blob/main/CLAUDE.md
 `;
 
-const SKILL_BLOCK = `\n<!-- Handoff-CDN Skill v${VERSION} -->\n# Handoff-CDN Design Protocol\n\nWhen implementing any UI from a Handoff-CDN bundle:\n- Maintain pixel-perfect fidelity — no simplification or "improvements"\n- Preserve all oklch() color values — do not convert to hex\n- Enforce family token rules: Liquid Glass (8px baseline, blur required) or Monochrome (4px baseline, radius ≤ 6px)\n- Never mix design families within a component\n- Full contract: https://github.com/miikeey1100/Claude-Design-Handoff-Vault/blob/main/CLAUDE.md\n<!-- /Handoff-CDN Skill -->\n`;
+const SKILL_BLOCK = `\n<!-- Handoff-CDN Skill v${VERSION} -->\n# Handoff-CDN Design Protocol\n\nWhen implementing any UI from a Handoff-CDN bundle:\n- Maintain pixel-perfect fidelity — no simplification or "improvements"\n- Preserve all oklch() color values — do not convert to hex\n- Enforce family token rules: Liquid Glass (8px baseline, blur required) or Monochrome (4px baseline, radius ≤ 6px)\n- Never mix design families within a component\n- Full contract: https://github.com/miikeey1100/handoff-cdn/blob/main/CLAUDE.md\n<!-- /Handoff-CDN Skill -->\n`;
 
 function get(url) {
   return new Promise((resolve, reject) => {
@@ -187,7 +187,7 @@ Examples:
   npx handoff-cdn grade ./dist/index.html --against aerodrop
   npx handoff-cdn forge "neobrutalist notes app, orange accents"
 
-Protocol: https://github.com/miikeey1100/Claude-Design-Handoff-Vault
+Protocol: https://github.com/miikeey1100/handoff-cdn
 `);
   exit(0);
 }
@@ -834,6 +834,6 @@ You are implementing a Handoff-CDN bundle. This is a pixel-perfect contract:
 4. **No scope creep.** Do not add features, animations, or changes not in the original.
 5. **Framework choice is yours** — React, Vue, SwiftUI, plain CSS — match the visual output.
 
-Full protocol: https://github.com/miikeey1100/Claude-Design-Handoff-Vault/blob/main/CLAUDE.md
+Full protocol: https://github.com/miikeey1100/handoff-cdn/blob/main/CLAUDE.md
 Preview: ${manifest.cdn}/${b.preview}
 `);

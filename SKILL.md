@@ -32,7 +32,7 @@ When implementing any UI from a Handoff-CDN bundle:
 - Preserve all oklch() color values — do not convert to hex
 - Enforce family token rules: Liquid Glass (8px baseline, blur required) or Monochrome (4px baseline, radius ≤ 6px)
 - Never mix design families within a component
-- Full contract: https://github.com/miikeey1100/Claude-Design-Handoff-Vault/blob/main/CLAUDE.md
+- Full contract: https://github.com/miikeey1100/handoff-cdn/blob/main/CLAUDE.md
 <!-- /Handoff-CDN Skill -->
 ```
 
@@ -75,4 +75,4 @@ Remove the `<!-- Handoff-CDN Skill -->` block from `CLAUDE.md`. The skill has no
 
 ---
 
-> Handoff-CDN Protocol v1.0 · https://github.com/miikeey1100/Claude-Design-Handoff-Vault
+> Handoff-CDN Protocol v1.0 · https://github.com/miikeey1100/handoff-cdn

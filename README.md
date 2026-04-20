@@ -12,7 +12,7 @@ each one packaged as a single command that pipes a complete design brief into an
 <br>
 
 [![npm](https://img.shields.io/npm/v/handoff-cdn?style=flat-square&logo=npm&color=000&label=npm)](https://www.npmjs.com/package/handoff-cdn)
-[![Stars](https://img.shields.io/github/stars/miikeey1100/Claude-Design-Handoff-Vault?style=flat-square&logo=github&color=000)](https://github.com/miikeey1100/Claude-Design-Handoff-Vault/stargazers)
+[![Stars](https://img.shields.io/github/stars/miikeey1100/handoff-cdn?style=flat-square&logo=github&color=000)](https://github.com/miikeey1100/handoff-cdn/stargazers)
 [![License: MIT](https://img.shields.io/badge/license-MIT-000?style=flat-square)](LICENSE)
 
 <br>
@@ -225,7 +225,7 @@ The CLI is 200 lines of Node built-ins. [Read it.](bin/handoff-cdn.js)
 Have a Claude Design export? Add it.
 
 ```bash
-git clone https://github.com/miikeey1100/Claude-Design-Handoff-Vault
+git clone https://github.com/miikeey1100/handoff-cdn
 # drop your bundle under bundles/<slug>/
 # add entry to manifest.json
 # npm run capture && npm run compare
@@ -244,7 +244,7 @@ If Handoff-CDN saves you an hour of prompt-wrestling, star it.
 
 Stars help surface this to the developers who need it — and fund the next 24 bundles.
 
-**[⭐ Star on GitHub](https://github.com/miikeey1100/Claude-Design-Handoff-Vault)**
+**[⭐ Star on GitHub](https://github.com/miikeey1100/handoff-cdn)**
 
 ---
 

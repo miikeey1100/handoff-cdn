@@ -2,7 +2,7 @@
 import https from 'node:https';
 import { argv, stdout, stderr, exit } from 'node:process';
 
-const RAW = 'https://raw.githubusercontent.com/miikeey1100/Claude-Design-Handoff-Vault/main/bundles';
+const RAW = 'https://raw.githubusercontent.com/miikeey1100/handoff-cdn/main/bundles';
 
 const BUNDLES = {
   'aerodrop':     { dir: 'aerodrop-luxury-ui', file: 'AeroDrop.html',         family: 'Liquid Glass', title: 'AeroDrop — Autonomous AI Delivery',   fidelity: '98%' },
@@ -116,5 +116,5 @@ Implement this design pixel-perfectly in whatever framework fits the target code
 - Use the ${b.family} token system defined at the top as your source of truth.
 - Do not add features, simplify layouts, or deviate from the visual output shown.
 - If the design uses oklch() colors, preserve them — do not convert to hex.
-- Full token contract: https://github.com/miikeey1100/Claude-Design-Handoff-Vault/blob/main/CLAUDE.md
+- Full token contract: https://github.com/miikeey1100/handoff-cdn/blob/main/CLAUDE.md
 `);
