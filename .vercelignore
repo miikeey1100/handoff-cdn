@@ -1,0 +1,12 @@
+node_modules
+.git
+bundles
+previews
+marketing
+examples
+scripts
+vscode-extension
+demo-output.html
+*.tape
+*.md
+!README.md

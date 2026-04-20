@@ -17,7 +17,9 @@ each one packaged as a single command that pipes a complete design brief into an
 
 <br>
 
-![demo](marketing/demo.gif)
+[![demo](marketing/demo-hero.png)](https://miikeey1100.github.io/handoff-cdn/)
+
+<sub>▲ [**Live animated demo**](https://miikeey1100.github.io/handoff-cdn/)  ·  [**Live arena** (Plain Opus 4.7 vs Opus 4.7 + Handoff-CDN)](https://handoff-cdn.vercel.app/)</sub>
 
 <br>
 
@@ -141,7 +143,7 @@ Works with **Claude Code, Cursor, ChatGPT, Gemini, Copilot** — any tool that a
 | `handoff-cdn forge --from-image <path>` | Screenshot → Handoff-CDN bundle. Vision-in, compliant bundle out (HTML + tokens.css + chat.md). |
 | `handoff-cdn arena [--mock]` | Live split-screen race: Opus 4.7 alone vs Opus 4.7 + Handoff-CDN. Opus grades both. Typical delta: +32 points. |
 | **VS Code extension** (`vscode-extension/`) | Activity-bar sidebar with all 14 bundles. One click inserts a full design contract into your active editor — works with Copilot Chat, Cline, Continue. |
-| **Hosted arena** (Vercel) | `vercel.json` + `api/*.js` — deploy your own instance in one command. No install, judges click a link. |
+| **Hosted arena** (Vercel) | Live at [**handoff-cdn.vercel.app**](https://handoff-cdn.vercel.app/). `vercel.json` + `api/*.js` — deploy your own instance in one command. No install, judges click a link. |
 
 All commands support `--mock` for offline demos — canned responses, no API key needed.
 
