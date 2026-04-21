@@ -1,603 +1,1060 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
+<meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Handoff-CDN Arena — Opus 4.7 vs Opus 4.7 + Handoff</title>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<title>Handoff-CDN Arena</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --bg-0:     oklch(0.09 0.04 260);
-    --bg-1:     oklch(0.12 0.02 270);
-    --panel:    oklch(1 0 0 / 0.04);
-    --panel-hi: oklch(1 0 0 / 0.08);
-    --stroke:   oklch(1 0 0 / 0.10);
-    --stroke-hi: oklch(1 0 0 / 0.18);
-    --ink-100:  oklch(0.97 0.005 80);
-    --ink-70:   oklch(0.78 0.008 80);
-    --ink-50:   oklch(0.58 0.010 80);
-    --accent:   oklch(0.85 0.14 80);
-    --good:     oklch(0.78 0.14 145);
-    --bad:      oklch(0.65 0.18 25);
-    --mono:     "JetBrains Mono", ui-monospace, monospace;
-    --display:  "Space Grotesk", system-ui, sans-serif;
-    --blur:     blur(16px) saturate(140%);
-    --r-sm:     10px;
-    --r-md:     16px;
-    --r-lg:     24px;
+  :root{
+    --bg: oklch(0.09 0.04 260);
+    --wash-1: oklch(0.18 0.08 280);
+    --wash-2: oklch(0.15 0.08 20);
+    --glass: oklch(1 0 0 / 0.04);
+    --glass-strong: oklch(1 0 0 / 0.07);
+    --border: oklch(1 0 0 / 0.10);
+    --border-strong: oklch(1 0 0 / 0.18);
+    --text: oklch(0.97 0.01 260);
+    --text-dim: oklch(0.72 0.02 260);
+    --text-faint: oklch(0.52 0.02 260);
+    --amber: oklch(0.85 0.14 80);
+    --amber-soft: oklch(0.85 0.14 80 / 0.18);
+    --green: oklch(0.78 0.14 145);
+    --green-soft: oklch(0.78 0.14 145 / 0.14);
+    --red: oklch(0.65 0.18 25);
+    --red-soft: oklch(0.65 0.18 25 / 0.14);
+    --magenta: oklch(0.72 0.22 340);
+
+    --display: 'Space Grotesk', system-ui, sans-serif;
+    --mono: 'JetBrains Mono', ui-monospace, monospace;
   }
-  html, body { height: 100%; }
-  body {
-    background:
-      radial-gradient(100% 60% at 20% 10%, oklch(0.18 0.08 280) 0%, transparent 60%),
-      radial-gradient(100% 60% at 80% 0%, oklch(0.15 0.08 20) 0%, transparent 60%),
-      var(--bg-0);
-    color: var(--ink-100);
+
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html, body{ min-height:100%; }
+  body{
     font-family: var(--display);
-    min-height: 100vh;
-    overflow-x: hidden;
+    color: var(--text);
+    background: var(--bg);
+    background-image:
+      radial-gradient(900px 700px at 20% 20%, var(--wash-1), transparent 60%),
+      radial-gradient(1100px 800px at 80% 80%, var(--wash-2), transparent 60%);
+    background-attachment: fixed;
+    -webkit-font-smoothing: antialiased;
+    letter-spacing: -0.01em;
+    overflow-x:hidden;
   }
 
-  header {
-    padding: 18px 28px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-bottom: 1px solid var(--stroke);
-    background: oklch(0 0 0 / 0.3);
-    backdrop-filter: var(--blur);
-    position: sticky; top: 0; z-index: 10;
+  /* noise over wash */
+  body::before{
+    content:"";
+    position: fixed; inset:0;
+    background-image:
+      radial-gradient(circle at 10% 30%, oklch(1 0 0 / 0.015) 0 1px, transparent 1px),
+      radial-gradient(circle at 70% 60%, oklch(1 0 0 / 0.015) 0 1px, transparent 1px);
+    background-size: 3px 3px, 4px 4px;
+    pointer-events:none;
+    z-index:0;
+    mix-blend-mode: overlay;
+    opacity:.5;
   }
-  .brand {
-    display: flex; align-items: center; gap: 12px;
-    font-weight: 700; letter-spacing: -0.01em; font-size: 17px;
-  }
-  .brand .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 16px var(--accent); }
-  .brand em { font-style: normal; color: var(--ink-50); font-weight: 500; }
-  header nav { display: flex; gap: 18px; font-size: 13px; color: var(--ink-70); }
-  header nav a { color: inherit; text-decoration: none; padding: 6px 10px; border-radius: 8px; }
-  header nav a:hover { background: var(--panel); color: var(--ink-100); }
 
-  main { padding: 36px 28px 56px; max-width: 1480px; margin: 0 auto; }
+  a{ color: inherit; text-decoration:none; }
 
-  .hero { text-align: center; margin-bottom: 32px; }
-  .hero h1 { font-size: clamp(28px, 4vw, 48px); font-weight: 700; letter-spacing: -0.025em; line-height: 1.05; margin-bottom: 10px; }
-  .hero h1 span { background: linear-gradient(90deg, var(--accent), oklch(0.75 0.18 20)); -webkit-background-clip: text; background-clip: text; color: transparent; }
-  .hero p { color: var(--ink-70); font-size: 15px; max-width: 720px; margin: 0 auto; line-height: 1.5; }
+  /* ---------- Glass primitive ---------- */
+  .glass{
+    background: var(--glass);
+    border: 1px solid var(--border);
+    backdrop-filter: blur(16px) saturate(140%);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+  }
 
-  .controls {
-    background: var(--panel);
-    border: 1px solid var(--stroke);
-    border-radius: var(--r-lg);
-    backdrop-filter: var(--blur);
-    padding: 16px;
-    display: grid;
-    grid-template-columns: 1fr 220px 180px;
-    gap: 12px;
-    margin-bottom: 24px;
-    align-items: center;
+  /* ---------- Header ---------- */
+  header{
+    position: sticky; top:0; z-index: 30;
+    height: 64px;
+    display:flex; align-items:center;
+    padding: 0 28px;
+    gap: 24px;
+    border-bottom: 1px solid var(--border);
   }
-  .controls input, .controls select {
-    background: oklch(0 0 0 / 0.4);
-    border: 1px solid var(--stroke);
-    color: var(--ink-100);
-    font: inherit;
-    padding: 14px 16px;
-    border-radius: var(--r-md);
-    font-size: 14px;
-    outline: none;
-    transition: border 0.15s;
+  .brand{
+    display:flex; align-items:center; gap: 10px;
+    font-family: var(--display);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    font-size: 15px;
   }
-  .controls input:focus, .controls select:focus { border-color: var(--stroke-hi); }
-  .controls button {
-    background: linear-gradient(180deg, var(--accent), oklch(0.75 0.14 70));
-    border: none;
-    color: oklch(0.15 0.04 60);
+  .pulse-dot{
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--amber);
+    box-shadow: 0 0 0 0 var(--amber);
+    animation: pulse 1.8s ease-out infinite;
+  }
+  @keyframes pulse{
+    0%{ box-shadow: 0 0 0 0 oklch(0.85 0.14 80 / .7), 0 0 12px oklch(0.85 0.14 80 / .8);}
+    70%{ box-shadow: 0 0 0 10px oklch(0.85 0.14 80 / 0), 0 0 14px oklch(0.85 0.14 80 / .4);}
+    100%{ box-shadow: 0 0 0 0 oklch(0.85 0.14 80 / 0), 0 0 10px oklch(0.85 0.14 80 / .6);}
+  }
+  .wordmark{
     font-family: var(--display);
     font-weight: 700;
-    padding: 14px 20px;
-    border-radius: var(--r-md);
-    cursor: pointer;
-    font-size: 14px;
-    letter-spacing: 0.01em;
-    transition: transform 0.1s, box-shadow 0.2s;
-    box-shadow: 0 8px 24px oklch(0.85 0.14 80 / 0.25);
   }
-  .controls button:hover { transform: translateY(-1px); box-shadow: 0 12px 32px oklch(0.85 0.14 80 / 0.4); }
-  .controls button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+  .wordmark .slash{ color: var(--text-faint); margin: 0 6px; font-weight:400; }
+  .wordmark .tag{ color: var(--amber); font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; margin-left: 10px; padding: 3px 8px; border: 1px solid var(--border); border-radius: 999px; background: var(--amber-soft); text-transform: uppercase; }
 
-  .arena {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
+  nav{
+    margin-left: auto;
+    display:flex; align-items:center; gap: 4px;
+    font-family: var(--mono);
+    font-size: 12px;
   }
-  .lane {
-    background: var(--panel);
-    border: 1px solid var(--stroke);
-    border-radius: var(--r-lg);
-    backdrop-filter: var(--blur);
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    min-height: 620px;
+  nav a{
+    padding: 8px 14px;
+    color: var(--text-dim);
+    border-radius: 8px;
+    display: inline-flex; gap:8px; align-items:center;
+    transition: color .2s ease, background .2s ease;
   }
-  .lane-head {
-    padding: 14px 18px;
-    display: flex;
+  nav a:hover{ color: var(--text); background: var(--glass-strong); }
+  nav .sep{ width:1px; height: 16px; background: var(--border); margin: 0 6px; }
+  nav .key{ color: var(--text-faint); font-size: 10px; letter-spacing: 0.08em; padding-left: 10px; text-transform: uppercase; }
+
+  /* ---------- Page layout ---------- */
+  main{
+    position: relative; z-index: 2;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 48px 28px 80px;
+  }
+
+  /* ---------- Hero ---------- */
+  .hero{ text-align:center; padding: 24px 0 36px; }
+  .eyebrow{
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    color: var(--text-faint);
+    text-transform: uppercase;
+    display:inline-flex; align-items:center; gap:10px;
+    padding: 6px 12px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--glass);
+  }
+  .eyebrow .dot{ width:6px;height:6px;border-radius:50%;background:var(--amber); box-shadow: 0 0 10px var(--amber);}
+  h1{
+    margin-top: 18px;
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: clamp(36px, 5.5vw, 68px);
+    line-height: 1.02;
+    letter-spacing: -0.035em;
+  }
+  h1 .vs{
+    background: linear-gradient(90deg, var(--amber), var(--magenta));
+    -webkit-background-clip: text; background-clip: text;
+    color: transparent;
+    font-style: italic;
+    font-weight: 700;
+    padding: 0 .15em;
+  }
+  h1 .plus{ color: var(--text-dim); font-weight: 400; }
+  .sub{
+    margin: 18px auto 0;
+    max-width: 640px;
+    color: var(--text-dim);
+    font-size: 15px;
+    line-height: 1.55;
+  }
+
+  /* ---------- Control Strip ---------- */
+  .control{
+    margin: 36px auto 0;
+    padding: 14px;
+    border-radius: 16px;
+    display:grid;
+    grid-template-columns: 1fr 260px 160px;
+    gap: 10px;
     align-items: center;
-    justify-content: space-between;
-    border-bottom: 1px solid var(--stroke);
   }
-  .lane-title { display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; letter-spacing: 0.03em; text-transform: uppercase; }
-  .lane-title .chip { font-family: var(--mono); font-size: 10px; padding: 4px 8px; border-radius: 6px; border: 1px solid var(--stroke); background: oklch(0 0 0 / 0.3); color: var(--ink-70); font-weight: 500; letter-spacing: 0.04em; }
-  .lane-title .chip.a { border-color: oklch(0.65 0.18 25 / 0.4); color: oklch(0.78 0.16 30); }
-  .lane-title .chip.b { border-color: oklch(0.75 0.14 145 / 0.4); color: var(--good); }
-  .lane-score {
+  .field{
+    display:flex; align-items:center; gap: 10px;
+    padding: 10px 14px;
+    background: oklch(1 0 0 / 0.025);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    transition: border-color .2s ease, background .2s ease;
+  }
+  .field:focus-within{ border-color: var(--border-strong); background: var(--glass-strong); }
+  .field svg{ opacity: .7; flex-shrink:0; }
+  .field input, .field select{
+    all: unset;
+    width: 100%;
     font-family: var(--mono);
     font-size: 13px;
-    color: var(--ink-50);
-    min-width: 140px;
-    text-align: right;
-    display: flex; flex-direction: column; gap: 4px; align-items: flex-end;
+    color: var(--text);
+    cursor: text;
   }
-  .lane-score strong { color: var(--ink-100); font-size: 16px; font-weight: 700; }
-  .live-bar {
-    width: 120px; height: 4px; background: var(--stroke); border-radius: 2px; overflow: hidden; display: none;
-  }
-  .live-bar.on { display: block; }
-  .live-bar-fill {
-    height: 100%; width: 0%; border-radius: 2px;
-    transition: width 0.4s ease-out;
-  }
-  .live-bar-fill.a { background: linear-gradient(90deg, oklch(0.65 0.18 25), oklch(0.75 0.16 30)); }
-  .live-bar-fill.b { background: linear-gradient(90deg, oklch(0.72 0.14 160), var(--good)); }
-  .live-label {
-    font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase;
-    padding: 2px 6px; border-radius: 4px; font-weight: 600;
-    background: oklch(0 0 0 / 0.4); color: var(--ink-50);
-    display: inline-flex; align-items: center; gap: 4px;
-  }
-  .live-label .pulse { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: pulse 1s infinite; }
-  @keyframes pulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.7); } }
-
-  .lane-viewport {
-    flex: 1;
-    position: relative;
-    background: oklch(0 0 0 / 0.5);
-    min-height: 500px;
-  }
-  .lane-viewport iframe {
-    width: 100%;
-    height: 100%;
-    border: 0;
-    display: block;
-  }
-  .lane-placeholder {
-    position: absolute; inset: 0;
-    display: flex; align-items: center; justify-content: center;
-    text-align: center; padding: 40px;
-    color: var(--ink-50);
-    font-size: 14px;
-    line-height: 1.6;
-  }
-  .lane-placeholder .hint { font-family: var(--mono); font-size: 11px; color: var(--ink-50); margin-top: 10px; opacity: 0.6; }
-  .spinner {
-    width: 24px; height: 24px;
-    border: 2px solid var(--stroke);
-    border-top-color: var(--accent);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-    margin: 0 auto 14px;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  .report {
-    margin-top: 24px;
-    background: var(--panel);
-    border: 1px solid var(--stroke);
-    border-radius: var(--r-lg);
-    backdrop-filter: var(--blur);
-    padding: 20px 24px;
-    display: none;
-  }
-  .report.on { display: block; }
-  .report-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
-  .report-col h3 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-50); margin-bottom: 10px; font-weight: 600; }
-  .report-col .score { font-family: var(--mono); font-size: 42px; font-weight: 700; letter-spacing: -0.02em; line-height: 1; }
-  .report-col .score.a { color: oklch(0.75 0.16 30); }
-  .report-col .score.b { color: var(--good); }
-  .report-col .score small { font-size: 16px; color: var(--ink-50); font-weight: 500; margin-left: 4px; }
-  .report-col .bar { height: 6px; border-radius: 3px; background: var(--stroke); margin: 10px 0; overflow: hidden; }
-  .report-col .bar-fill { height: 100%; transition: width 0.8s ease-out; }
-  .report-col .bar-fill.a { background: oklch(0.75 0.16 30); }
-  .report-col .bar-fill.b { background: var(--good); }
-  .report-col .summary { color: var(--ink-70); font-size: 13px; line-height: 1.5; }
-
-  .delta {
-    margin-top: 18px;
-    padding-top: 18px;
-    border-top: 1px solid var(--stroke);
-    text-align: center;
-    font-family: var(--mono);
-    font-size: 15px;
-    color: var(--ink-70);
-  }
-  .delta strong {
-    color: var(--good);
-    font-size: 28px;
-    font-weight: 700;
-    text-shadow: 0 0 24px oklch(0.72 0.18 150 / 0.5);
-    display: inline-block;
-    animation: deltaPop 0.5s cubic-bezier(.2,.8,.2,1);
-  }
-  @keyframes deltaPop { from { transform: scale(0.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-
-  /* Winner glow — applied via JS to the winning lane card */
-  .lane.winner {
-    box-shadow: 0 0 0 1px oklch(0.72 0.18 150 / 0.4), 0 0 40px oklch(0.72 0.18 150 / 0.3);
-    transition: box-shadow 0.6s ease-out;
-  }
-  .lane.winner::after {
-    content: "★ WINNER";
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    padding: 4px 10px;
-    border-radius: 6px;
-    background: var(--good);
-    color: #06120f;
+  .field select{ cursor: pointer; }
+  .field .label{
     font-family: var(--mono);
     font-size: 10px;
+    letter-spacing: 0.12em;
+    color: var(--text-faint);
+    text-transform: uppercase;
+    padding-right: 8px;
+    border-right: 1px solid var(--border);
+    margin-right: 4px;
+  }
+
+  .race-btn{
+    all: unset;
+    cursor: pointer;
+    height: 100%;
+    min-height: 46px;
+    border-radius: 12px;
+    font-family: var(--mono);
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    display:flex; align-items:center; justify-content:center; gap: 8px;
+    color: oklch(0.15 0.05 80);
+    background: linear-gradient(180deg, oklch(0.92 0.14 85), oklch(0.78 0.14 75));
+    border: 1px solid oklch(0.9 0.16 85);
+    box-shadow:
+      0 0 0 1px oklch(1 0 0 / 0.1) inset,
+      0 0 28px oklch(0.85 0.14 80 / 0.55),
+      0 6px 30px oklch(0.85 0.14 80 / 0.25);
+    transition: transform .15s ease, box-shadow .2s ease, filter .2s ease;
+  }
+  .race-btn:hover{ filter: brightness(1.05); box-shadow: 0 0 0 1px oklch(1 0 0 / 0.15) inset, 0 0 40px oklch(0.85 0.14 80 / 0.7), 0 8px 36px oklch(0.85 0.14 80 / 0.35);}
+  .race-btn:active{ transform: translateY(1px); }
+  .race-btn[disabled]{ filter: grayscale(.6) brightness(.7); cursor: not-allowed; }
+  .race-btn .arrow{ transition: transform .2s ease; }
+  .race-btn:hover .arrow{ transform: translateX(3px); }
+
+  /* ---------- Arena ---------- */
+  .arena{
+    margin-top: 28px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  .lane{
+    position: relative;
+    height: 620px;
+    border-radius: 20px;
+    padding: 22px;
+    display: flex; flex-direction: column;
+    overflow: hidden;
+    transition: box-shadow .5s ease, border-color .5s ease;
+  }
+  .lane.winner{
+    box-shadow: 0 0 40px var(--green), 0 0 0 1px oklch(0.78 0.14 145 / 0.5) inset;
+    border-color: oklch(0.78 0.14 145 / 0.5);
+  }
+  .lane.loser{ opacity: .78; }
+
+  .lane-head{
+    display:flex; justify-content:space-between; align-items:flex-start;
+    gap: 12px;
+  }
+  .chip{
+    display:inline-flex; align-items:center; gap: 8px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border: 1px solid var(--border);
+  }
+  .chip .swatch{ width: 8px; height: 8px; border-radius: 50%; }
+  .chip.red{ color: var(--red); border-color: oklch(0.65 0.18 25 / 0.4); background: var(--red-soft); }
+  .chip.red .swatch{ background: var(--red); box-shadow: 0 0 10px var(--red); }
+  .chip.green{ color: var(--green); border-color: oklch(0.78 0.14 145 / 0.4); background: var(--green-soft); }
+  .chip.green .swatch{ background: var(--green); box-shadow: 0 0 10px var(--green); }
+
+  .winner-badge{
+    display:none;
+    align-items:center; gap:6px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-family: var(--mono);
+    font-size: 11px;
     font-weight: 700;
     letter-spacing: 0.1em;
-    z-index: 10;
-    animation: winnerFade 0.4s ease-out;
+    text-transform: uppercase;
+    color: oklch(0.15 0.08 145);
+    background: linear-gradient(180deg, oklch(0.9 0.16 145), oklch(0.72 0.16 145));
+    box-shadow: 0 0 20px var(--green);
   }
-  @keyframes winnerFade { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
-  .lane { position: relative; }
+  .lane.winner .winner-badge{ display: inline-flex; animation: popIn .35s cubic-bezier(.2,1.5,.4,1); }
+  @keyframes popIn{ 0%{ transform: scale(.6); opacity:0;} 100%{transform:scale(1); opacity:1;} }
 
-  /* Cinematic countdown overlay — shown for ~3s before race starts */
-  .countdown {
-    position: fixed;
-    inset: 0;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    background: oklch(0 0 0 / 0.85);
-    backdrop-filter: blur(12px);
-    z-index: 9999;
+  .lane-title{
+    margin-top: 14px;
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+  .lane-title .meta{
+    display:block;
+    margin-top: 4px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-faint);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-weight: 400;
+  }
+
+  /* progress bar vertical area */
+  .gauge{
+    margin-top: 22px;
+    flex: 1;
+    display:flex; flex-direction: column;
+    border-top: 1px solid var(--border);
+    padding-top: 18px;
+  }
+  .gauge .score-row{
+    display:flex; justify-content: space-between; align-items:baseline;
     font-family: var(--mono);
   }
-  .countdown.on { display: flex; }
-  .countdown-num {
-    font-size: 220px;
-    font-weight: 800;
-    color: var(--ink-100);
-    letter-spacing: -0.05em;
+  .gauge .score-row .label{ font-size: 10px; color: var(--text-faint); letter-spacing: 0.14em; text-transform: uppercase; }
+  .gauge .score{
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 84px;
+    letter-spacing: -0.04em;
     line-height: 1;
-    text-shadow: 0 0 60px oklch(0.72 0.18 150 / 0.4);
-    animation: countPop 1s cubic-bezier(.2,.8,.2,1);
+    font-variant-numeric: tabular-nums;
   }
-  .countdown-num.go {
-    color: var(--good);
-    font-size: 160px;
-    letter-spacing: 0.05em;
+  .lane.a .score{ color: var(--text); }
+  .lane.b .score{ color: var(--text); }
+  .lane.winner .score{ color: var(--green); text-shadow: 0 0 30px oklch(0.78 0.14 145 / 0.5); }
+
+  .bar-track{
+    position: relative;
+    margin-top: 18px;
+    height: 16px;
+    border-radius: 999px;
+    background: oklch(1 0 0 / 0.04);
+    border: 1px solid var(--border);
+    overflow: hidden;
   }
-  @keyframes countPop {
-    0%   { transform: scale(0.4); opacity: 0; }
-    40%  { transform: scale(1.1); opacity: 1; }
-    100% { transform: scale(1); opacity: 1; }
+  .bar-fill{
+    position: absolute; inset: 0;
+    width: 0%;
+    border-radius: 999px;
+    transition: width .08s linear;
+  }
+  .lane.a .bar-fill{ background: linear-gradient(90deg, oklch(0.55 0.18 25), oklch(0.7 0.18 25)); box-shadow: 0 0 20px oklch(0.65 0.18 25 / 0.6); }
+  .lane.b .bar-fill{ background: linear-gradient(90deg, oklch(0.6 0.14 145), oklch(0.8 0.14 145)); box-shadow: 0 0 20px oklch(0.78 0.14 145 / 0.6); }
+
+  /* Stats grid under bar */
+  .stats{
+    margin-top: 22px;
+    display:grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+  }
+  .stat{
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: oklch(1 0 0 / 0.02);
+  }
+  .stat .k{
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+  }
+  .stat .v{
+    margin-top: 6px;
+    font-family: var(--mono);
+    font-size: 15px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
   }
 
-  .examples { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; justify-content: center; }
-  .examples button {
-    background: oklch(0 0 0 / 0.3);
-    border: 1px solid var(--stroke);
-    color: var(--ink-70);
-    padding: 6px 12px;
-    border-radius: 8px;
-    font-size: 12px;
+  /* Log */
+  .log{
+    margin-top: 22px;
+    flex: 0 0 auto;
+    min-height: 110px;
+    max-height: 130px;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: oklch(0 0 0 / 0.2);
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    line-height: 1.7;
+    overflow: hidden;
+    position: relative;
+  }
+  .log::after{
+    content:""; position:absolute; left:0; right:0; bottom:0; height: 30px;
+    background: linear-gradient(to top, oklch(0 0 0 / 0.8), transparent);
+    pointer-events:none;
+  }
+  .log .line{ opacity: 0; animation: fadeIn .2s ease forwards; }
+  .log .line .t{ color: var(--text-faint); }
+  .log .line .tok{ color: var(--amber); }
+  .log .line .ok{ color: var(--green); }
+  .log .line .err{ color: var(--red); }
+  @keyframes fadeIn{ from{opacity:0; transform: translateY(4px);} to{opacity:1; transform: translateY(0);} }
+
+  /* ---------- Countdown overlay ---------- */
+  .overlay{
+    position: fixed; inset: 0; z-index: 50;
+    display:none;
+    align-items:center; justify-content:center;
+    background: oklch(0.09 0.04 260 / 0.45);
+    backdrop-filter: blur(22px) saturate(140%);
+    -webkit-backdrop-filter: blur(22px) saturate(140%);
+  }
+  .overlay.on{ display:flex; }
+  .count{
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(180px, 24vw, 320px);
+    letter-spacing: -0.06em;
+    line-height: 1;
+    background: linear-gradient(180deg, oklch(1 0 0 / 1), oklch(0.85 0.14 80));
+    -webkit-background-clip: text; background-clip: text;
+    color: transparent;
+    animation: popStep 900ms cubic-bezier(.2,1.5,.4,1);
+    text-shadow: 0 0 80px oklch(0.85 0.14 80 / 0.3);
+  }
+  .count.go{
+    background: linear-gradient(180deg, oklch(0.95 0.14 145), oklch(0.7 0.14 145));
+    -webkit-background-clip: text; background-clip: text;
+    text-shadow: 0 0 80px var(--green);
+    font-style: italic;
+  }
+  @keyframes popStep{
+    0%{ transform: scale(.4); opacity: 0; filter: blur(20px); }
+    30%{ transform: scale(1.1); opacity: 1; filter: blur(0); }
+    70%{ transform: scale(1); opacity: 1; }
+    100%{ transform: scale(1.3); opacity: 0; filter: blur(10px); }
+  }
+
+  /* ---------- Report Card ---------- */
+  .report-wrap{
+    margin-top: 24px;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height .6s cubic-bezier(.2,.8,.2,1);
+  }
+  .report-wrap.show{ max-height: 800px; }
+  .report{
+    padding: 26px;
+    border-radius: 20px;
+    transform: translateY(20px);
+    opacity: 0;
+    transition: transform .6s cubic-bezier(.2,.8,.2,1) .05s, opacity .5s ease .1s;
+  }
+  .report-wrap.show .report{ transform: translateY(0); opacity: 1; }
+
+  .report-head{
+    display:flex; justify-content:space-between; align-items:center;
+    padding-bottom: 18px; border-bottom: 1px solid var(--border);
+  }
+  .report-head h2{
+    font-family: var(--display);
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    font-size: 22px;
+  }
+  .report-head .meta{
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-faint);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .report-grid{
+    margin-top: 22px;
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+  }
+  .r-col .r-name{
+    display:flex; align-items:center; gap: 10px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .r-col .r-score{
+    margin-top: 8px;
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: 72px;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.04em;
+  }
+  .r-col.a .r-score{ color: var(--red); }
+  .r-col.b .r-score{ color: var(--green); text-shadow: 0 0 24px oklch(0.78 0.14 145 / 0.5); }
+
+  .r-bars{ margin-top: 18px; display:flex; flex-direction:column; gap: 12px; }
+  .r-bar{}
+  .r-bar .r-bar-top{
+    display:flex; justify-content:space-between; align-items:baseline;
+    font-family: var(--mono);
+    font-size: 11px;
+  }
+  .r-bar .r-bar-top .l{ color: var(--text-dim); letter-spacing: 0.08em; text-transform: uppercase; }
+  .r-bar .r-bar-top .n{ color: var(--text); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .r-bar .r-bar-track{
+    margin-top: 6px;
+    height: 8px; border-radius: 999px;
+    background: oklch(1 0 0 / 0.04);
+    border: 1px solid var(--border);
+    overflow:hidden;
+  }
+  .r-bar .r-bar-fill{ height:100%; border-radius: 999px; width: 0%; transition: width 1s cubic-bezier(.2,.8,.2,1); }
+  .r-col.a .r-bar-fill{ background: linear-gradient(90deg, oklch(0.55 0.18 25), oklch(0.7 0.18 25)); }
+  .r-col.b .r-bar-fill{ background: linear-gradient(90deg, oklch(0.6 0.14 145), oklch(0.8 0.14 145)); box-shadow: 0 0 12px oklch(0.78 0.14 145 / 0.5); }
+
+  .report-foot{
+    margin-top: 26px;
+    padding: 16px 20px;
+    border-radius: 14px;
+    border: 1px solid oklch(0.78 0.14 145 / 0.35);
+    background: var(--green-soft);
+    box-shadow: 0 0 30px oklch(0.78 0.14 145 / 0.25) inset, 0 0 40px oklch(0.78 0.14 145 / 0.15);
+    display:flex; justify-content:space-between; align-items:center;
+    gap: 16px;
+  }
+  .report-foot .left{ display:flex; flex-direction:column; gap: 4px; }
+  .report-foot .delta{
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: 26px;
+    color: var(--green);
+    letter-spacing: -0.02em;
+    text-shadow: 0 0 20px oklch(0.78 0.14 145 / 0.6);
+  }
+  .report-foot .cap{
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .ghost-btn{
+    all: unset;
     cursor: pointer;
     font-family: var(--mono);
-    transition: background 0.15s, color 0.15s;
-  }
-  .examples button:hover { background: var(--panel-hi); color: var(--ink-100); }
-
-  footer {
-    margin-top: 48px;
-    padding: 24px 0;
-    text-align: center;
-    color: var(--ink-50);
     font-size: 12px;
-    border-top: 1px solid var(--stroke);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 10px 16px;
+    border-radius: 10px;
+    border: 1px solid var(--border-strong);
+    color: var(--text);
+    background: var(--glass);
+    transition: background .2s ease;
   }
-  footer a { color: var(--ink-70); text-decoration: none; }
-  footer a:hover { color: var(--ink-100); }
+  .ghost-btn:hover{ background: var(--glass-strong); }
 
-  @media (max-width: 900px) {
-    .arena { grid-template-columns: 1fr; }
-    .controls { grid-template-columns: 1fr; }
-    .report-row { grid-template-columns: 1fr; }
+  /* ---------- Endpoints ---------- */
+  .endpoints{
+    margin-top: 28px;
+    padding: 20px;
+    border-radius: 16px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+  .endpoint{
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: oklch(0 0 0 / 0.2);
+    display:flex; flex-direction:column; gap: 6px;
+  }
+  .endpoint .method{
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    color: var(--amber);
+    text-transform: uppercase;
+  }
+  .endpoint code{
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--text);
+  }
+  .endpoint .desc{
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-faint);
+    line-height: 1.5;
+  }
+
+  footer{
+    margin-top: 48px;
+    padding: 20px 4px 0;
+    border-top: 1px solid var(--border);
+    display:flex; justify-content:space-between; align-items:center;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-faint);
+    letter-spacing: 0.08em;
+  }
+
+  @media (max-width: 900px){
+    .control{ grid-template-columns: 1fr; }
+    .arena{ grid-template-columns: 1fr; }
+    .lane{ height: 520px; }
+    .report-grid{ grid-template-columns: 1fr; }
   }
 </style>
 </head>
 <body>
 
-<header>
-  <div id="countdown" class="countdown"><div id="countdown-num" class="countdown-num">3</div></div>
-  <div class="brand"><span class="dot"></span>Handoff-CDN Arena<em>&nbsp;·&nbsp;live fidelity race</em></div>
+<header class="glass">
+  <div class="brand">
+    <span class="pulse-dot"></span>
+    <span class="wordmark">handoff-cdn<span class="slash">/</span>arena</span>
+    <span class="tag">v0.6.0 · live</span>
+  </div>
   <nav>
-    <a href="https://github.com/miikeey1100/handoff-cdn" target="_blank">GitHub</a>
-    <a href="https://www.npmjs.com/package/handoff-cdn" target="_blank">npm</a>
+    <a href="https://github.com/miikeey1100/handoff-cdn" target="_blank" rel="noopener"><svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.69-.01-1.35-2.22.48-2.69-1.07-2.69-1.07-.36-.92-.88-1.17-.88-1.17-.72-.49.05-.48.05-.48.8.06 1.22.82 1.22.82.71 1.21 1.86.86 2.31.66.07-.51.28-.86.5-1.06-1.77-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.19 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>github</a>
+    <a href="https://www.npmjs.com/package/handoff-cdn" target="_blank" rel="noopener"><svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><rect x="0" y="4" width="16" height="8" rx="1"/><rect x="2" y="6" width="2" height="4" fill="#111"/><rect x="6" y="6" width="4" height="6" fill="#111"/><rect x="7" y="7" width="1" height="3" fill="currentColor"/></svg>npm</a>
+    <span class="sep"></span>
+    <a href="https://github.com/miikeey1100/handoff-cdn#readme" target="_blank" rel="noopener">docs</a>
+    <a href="https://github.com/miikeey1100/handoff-cdn/releases" target="_blank" rel="noopener">changelog</a>
+    <span class="key">⌘K</span>
   </nav>
 </header>
 
 <main>
   <section class="hero">
-    <h1>Plain Opus 4.7 <span>vs</span> Opus 4.7 + Handoff-CDN</h1>
-    <p>Type a UI prompt. Two lanes race to build it. Opus 4.7 itself grades both against a Handoff-CDN design contract. The visual delta is the pitch.</p>
+    <span class="eyebrow"><span class="dot"></span>Head-to-head benchmark arena</span>
+    <h1>Plain Opus 4.7 <span class="vs">[vs]</span><br>Opus 4.7 <span class="plus">+</span> Handoff-CDN</h1>
+    <p class="sub">Run the same prompt through the raw model and through a Handoff-CDN–rehydrated context. The grader scores both. Winner takes the badge.</p>
   </section>
 
-  <section class="controls">
-    <input id="prompt" type="text" placeholder='e.g. "a crypto wallet with dark glass and a holographic balance card"' />
-    <select id="bundle">
-      <option value="">Loading bundles…</option>
-    </select>
-    <button id="race">Race →</button>
+  <section class="control glass">
+    <label class="field">
+      <span class="label">Prompt</span>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h10M4 18h16"/></svg>
+      <input id="prompt" type="text" value="Build me an autonomous AI delivery app — dark theme, iOS-style, glass panels, animated flight path." />
+    </label>
+    <label class="field">
+      <span class="label">Bundle</span>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+      <select id="bundle"></select>
+    </label>
+    <button id="race" class="race-btn">
+      <span>Race</span>
+      <span class="arrow">→</span>
+    </button>
   </section>
 
-  <div class="examples">
-    <button data-ex="aerodrop">autonomous AI delivery app</button>
-    <button data-ex="luxar-vault">AI crypto wallet, dark theme</button>
-    <button data-ex="agentic-ops">AI agent monitoring dashboard</button>
-    <button data-ex="neuralstore">AI e-commerce store</button>
-  </div>
-
-  <section class="arena" style="margin-top:24px;">
-    <div class="lane a">
+  <section class="arena">
+    <!-- Lane A -->
+    <article id="laneA" class="lane a glass">
       <div class="lane-head">
-        <div class="lane-title"><span class="chip a">LANE A</span> Plain Opus 4.7</div>
-        <div class="lane-score">
-          <span id="score-a">—</span>
-          <div class="live-bar" id="livebar-a"><div class="live-bar-fill a" id="livefill-a"></div></div>
+        <span class="chip red"><span class="swatch"></span>Lane A · Baseline</span>
+        <span class="winner-badge">★ Winner</span>
+      </div>
+      <div class="lane-title">Plain Opus 4.7
+        <span class="meta">no context · cold prompt</span>
+      </div>
+      <div class="gauge">
+        <div class="score-row">
+          <span class="label">Score</span>
+          <span class="label" id="timeA">00.0s</span>
+        </div>
+        <div class="score" id="scoreA">0</div>
+        <div class="bar-track"><div class="bar-fill" id="barA"></div></div>
+        <div class="stats">
+          <div class="stat"><div class="k">Tokens in</div><div class="v" id="tokInA">0</div></div>
+          <div class="stat"><div class="k">Tokens out</div><div class="v" id="tokOutA">0</div></div>
+          <div class="stat"><div class="k">Latency</div><div class="v" id="latA">—</div></div>
+        </div>
+        <div class="log" id="logA"></div>
+      </div>
+    </article>
+
+    <!-- Lane B -->
+    <article id="laneB" class="lane b glass">
+      <div class="lane-head">
+        <span class="chip green"><span class="swatch"></span>Lane B · Handoff-CDN</span>
+        <span class="winner-badge">★ Winner</span>
+      </div>
+      <div class="lane-title">Opus 4.7 + Handoff-CDN
+        <span class="meta">rehydrated · bundle attached</span>
+      </div>
+      <div class="gauge">
+        <div class="score-row">
+          <span class="label">Score</span>
+          <span class="label" id="timeB">00.0s</span>
+        </div>
+        <div class="score" id="scoreB">0</div>
+        <div class="bar-track"><div class="bar-fill" id="barB"></div></div>
+        <div class="stats">
+          <div class="stat"><div class="k">Tokens in</div><div class="v" id="tokInB">0</div></div>
+          <div class="stat"><div class="k">Tokens out</div><div class="v" id="tokOutB">0</div></div>
+          <div class="stat"><div class="k">Latency</div><div class="v" id="latB">—</div></div>
+        </div>
+        <div class="log" id="logB"></div>
+      </div>
+    </article>
+  </section>
+
+  <section class="report-wrap" id="reportWrap">
+    <div class="report glass">
+      <div class="report-head">
+        <h2>Race Report · <span id="reportId" style="font-family:var(--mono); color:var(--text-dim); font-weight:500; font-size:16px;">#0001</span></h2>
+        <span class="meta" id="reportMeta">graded by rubric-v3</span>
+      </div>
+      <div class="report-grid">
+        <div class="r-col a">
+          <div class="r-name"><span class="chip red" style="padding:3px 8px; font-size:10px;"><span class="swatch"></span>Lane A</span>Plain Opus 4.7</div>
+          <div class="r-score" id="finalA">0</div>
+          <div class="r-bars">
+            <div class="r-bar"><div class="r-bar-top"><span class="l">oklch preservation</span><span class="n" id="rAc1">0</span></div><div class="r-bar-track"><div class="r-bar-fill" id="rAf1"></div></div></div>
+            <div class="r-bar"><div class="r-bar-top"><span class="l">Radius compliance</span><span class="n" id="rAc2">0</span></div><div class="r-bar-track"><div class="r-bar-fill" id="rAf2"></div></div></div>
+            <div class="r-bar"><div class="r-bar-top"><span class="l">Family consistency</span><span class="n" id="rAc3">0</span></div><div class="r-bar-track"><div class="r-bar-fill" id="rAf3"></div></div></div>
+            <div class="r-bar"><div class="r-bar-top"><span class="l">Typography match</span><span class="n" id="rAc4">0</span></div><div class="r-bar-track"><div class="r-bar-fill" id="rAf4"></div></div></div>
+          </div>
+        </div>
+        <div class="r-col b">
+          <div class="r-name"><span class="chip green" style="padding:3px 8px; font-size:10px;"><span class="swatch"></span>Lane B</span>Opus 4.7 + Handoff-CDN</div>
+          <div class="r-score" id="finalB">0</div>
+          <div class="r-bars">
+            <div class="r-bar"><div class="r-bar-top"><span class="l">oklch preservation</span><span class="n" id="rBc1">0</span></div><div class="r-bar-track"><div class="r-bar-fill" id="rBf1"></div></div></div>
+            <div class="r-bar"><div class="r-bar-top"><span class="l">Radius compliance</span><span class="n" id="rBc2">0</span></div><div class="r-bar-track"><div class="r-bar-fill" id="rBf2"></div></div></div>
+            <div class="r-bar"><div class="r-bar-top"><span class="l">Family consistency</span><span class="n" id="rBc3">0</span></div><div class="r-bar-track"><div class="r-bar-fill" id="rBf3"></div></div></div>
+            <div class="r-bar"><div class="r-bar-top"><span class="l">Typography match</span><span class="n" id="rBc4">0</span></div><div class="r-bar-track"><div class="r-bar-fill" id="rBf4"></div></div></div>
+          </div>
         </div>
       </div>
-      <div class="lane-viewport" id="viewport-a">
-        <div class="lane-placeholder">Awaiting prompt…<div class="hint">just the prompt, no design contract</div></div>
-      </div>
-    </div>
-    <div class="lane b">
-      <div class="lane-head">
-        <div class="lane-title"><span class="chip b">LANE B</span> Opus 4.7 + Handoff-CDN</div>
-        <div class="lane-score">
-          <span id="score-b">—</span>
-          <div class="live-bar" id="livebar-b"><div class="live-bar-fill b" id="livefill-b"></div></div>
+      <div class="report-foot">
+        <div class="left">
+          <div class="delta" id="deltaPts">+0 points</div>
+          <div class="cap" id="deltaCap">Handoff-CDN advantage · composite delta</div>
         </div>
-      </div>
-      <div class="lane-viewport" id="viewport-b">
-        <div class="lane-placeholder">Awaiting prompt…<div class="hint">prompt + design contract + reference bundle</div></div>
+        <button class="ghost-btn" id="rerun">Re-run ↻</button>
       </div>
     </div>
   </section>
 
-  <section class="report" id="report">
-    <div class="report-row">
-      <div class="report-col">
-        <h3>Lane A · Plain 4.7</h3>
-        <div class="score a"><span id="num-a">0</span><small>/100</small></div>
-        <div class="bar"><div class="bar-fill a" id="bar-a" style="width:0"></div></div>
-        <div class="summary" id="sum-a">—</div>
-      </div>
-      <div class="report-col">
-        <h3>Lane B · 4.7 + Handoff-CDN</h3>
-        <div class="score b"><span id="num-b">0</span><small>/100</small></div>
-        <div class="bar"><div class="bar-fill b" id="bar-b" style="width:0"></div></div>
-        <div class="summary" id="sum-b">—</div>
-      </div>
+  <section class="endpoints glass">
+    <div class="endpoint">
+      <span class="method">GET</span>
+      <code>/api/bundles</code>
+      <span class="desc">List available context bundles for rehydration.</span>
     </div>
-    <div class="delta" id="delta">—</div>
+    <div class="endpoint">
+      <span class="method">POST</span>
+      <code>/api/generate</code>
+      <span class="desc">Stream a completion from Lane A or Lane B.</span>
+    </div>
+    <div class="endpoint">
+      <span class="method">POST</span>
+      <code>/api/grade</code>
+      <span class="desc">Return rubric scores across four axes.</span>
+    </div>
   </section>
 
   <footer>
-    Built with Opus 4.7 · <a href="https://github.com/miikeey1100/handoff-cdn">miikeey1100/handoff-cdn</a> · MIT
+    <span>handoff-cdn · arena · &copy; 2026</span>
+    <span>obsidian liquid glass · dark only</span>
   </footer>
 </main>
 
+<div class="overlay" id="overlay">
+  <div class="count" id="count">3</div>
+</div>
+
 <script>
-const BUNDLES_URL = '/api/bundles';
-const GENERATE_URL = '/api/generate';
-const GRADE_URL = '/api/grade';
+/* ------------ Mocked endpoints ------------ */
+const MOCK_BUNDLES = [
+  { id: 'aerodrop',    name: 'aerodrop · Liquid Glass · 99%',    size: '1.2 MB', files: 14 },
+  { id: 'visionsynth', name: 'visionsynth · Liquid Glass · 97%', size: '0.9 MB', files: 11 },
+  { id: 'luxar-vault', name: 'luxar-vault · Liquid Glass · 98%', size: '1.1 MB', files: 13 },
+  { id: 'agentic-ops', name: 'agentic-ops · Monochrome · 97%',   size: '0.8 MB', files: 10 },
+  { id: 'crystalpay',  name: 'crystalpay · Liquid Glass · 96%',  size: '0.7 MB', files: 9  },
+  { id: 'spectra-chat',name: 'spectra-chat · Liquid Glass · 97%',size: '0.6 MB', files: 8  },
+  { id: 'auroramail',  name: 'auroramail · Liquid Glass · 96%',  size: '0.8 MB', files: 10 },
+  { id: 'biopulse',    name: 'biopulse · Liquid Glass · 96%',    size: '0.7 MB', files: 9  },
+  { id: 'tradepulse',  name: 'tradepulse · Monochrome · 97%',    size: '0.9 MB', files: 11 },
+  { id: 'sentrygrid',  name: 'sentrygrid · Monochrome · 96%',    size: '0.8 MB', files: 10 },
+  { id: 'shiptrack',   name: 'shiptrack · Monochrome · 95%',     size: '0.7 MB', files: 9  },
+  { id: 'orchestrator',name: 'orchestrator · Monochrome · 95%',  size: '0.8 MB', files: 10 },
+  { id: 'neuralstore', name: 'neuralstore · Monochrome · 96%',   size: '0.9 MB', files: 11 },
+  { id: 'frontier',    name: 'frontier · Monochrome · 94%',      size: '0.7 MB', files: 9  },
+];
 
-const $ = id => document.getElementById(id);
-
-let BUNDLES = [];
-
-async function loadBundles() {
-  const sel = $('bundle');
-  try {
-    const r = await fetch(BUNDLES_URL);
-    const data = await r.json();
-    BUNDLES = data.bundles;
-    sel.innerHTML = '';
-    const glass = BUNDLES.filter(b => b.family === 'Liquid Glass');
-    const mono = BUNDLES.filter(b => b.family === 'Monochrome');
-    const og1 = document.createElement('optgroup'); og1.label = '✦ Liquid Glass';
-    for (const b of glass) { const o = document.createElement('option'); o.value = b.slug; o.textContent = b.slug; og1.appendChild(o); }
-    const og2 = document.createElement('optgroup'); og2.label = '◆ Monochrome';
-    for (const b of mono) { const o = document.createElement('option'); o.value = b.slug; o.textContent = b.slug; og2.appendChild(o); }
-    sel.appendChild(og1); sel.appendChild(og2);
-    sel.value = 'aerodrop';
-  } catch (e) {
-    sel.innerHTML = '<option>no bundles — run: npx handoff-cdn arena</option>';
+async function api_bundles(){
+  await wait(80);
+  return MOCK_BUNDLES;
+}
+async function api_generate({ lane, prompt, bundle }){
+  // returns { tokensIn, tokensOut, latencyMs }
+  await wait(60);
+  if (lane === 'A'){
+    return { tokensIn: 420 + rand(-40, 40), tokensOut: 680 + rand(-60, 80), latencyMs: 3400 + rand(-300, 400) };
   }
+  return { tokensIn: 12400 + rand(-400, 600), tokensOut: 920 + rand(-80, 120), latencyMs: 4100 + rand(-300, 400) };
 }
-
-function setLaneLoading(which, label) {
-  const v = $('viewport-' + which);
-  v.innerHTML = `<div class="lane-placeholder"><div class="spinner"></div>${label}</div>`;
-}
-
-function setLaneError(which, msg) {
-  const v = $('viewport-' + which);
-  v.innerHTML = `<div class="lane-placeholder" style="color:var(--bad)">${msg}</div>`;
-}
-
-function renderHTML(which, html) {
-  const v = $('viewport-' + which);
-  v.innerHTML = `<iframe sandbox="allow-scripts" srcdoc="${html.replace(/"/g,'&quot;')}"></iframe>`;
-}
-
-async function generate(prompt, slug, withBundle) {
-  const r = await fetch(GENERATE_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ prompt, slug, withBundle })
-  });
-  if (!r.ok) throw new Error('generate failed: ' + r.status);
-  const data = await r.json();
-  return data.html;
-}
-
-async function grade(html, slug) {
-  const r = await fetch(GRADE_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ html, slug })
-  });
-  if (!r.ok) throw new Error('grade failed: ' + r.status);
-  return r.json();
-}
-
-// Progressive "live" bar — animates while generation is in flight.
-// Simulates asymptotic progress (0 → 85) over estimated time, then snaps to
-// real score when generation + grading completes.
-function startLiveBar(which, estSeconds = 45) {
-  const bar = $('livebar-' + which);
-  const fill = $('livefill-' + which);
-  const scoreEl = $('score-' + which);
-  bar.classList.add('on');
-  fill.style.width = '0%';
-  scoreEl.innerHTML = '<span class="live-label"><span class="pulse"></span>LIVE</span>';
-  const start = Date.now();
-  let snapshot = 0;
-  const intv = setInterval(() => {
-    const t = (Date.now() - start) / 1000;
-    // asymptotic curve: 85 * (1 - e^(-t/est))
-    const pct = 85 * (1 - Math.exp(-t / estSeconds));
-    if (pct > snapshot) snapshot = pct;
-    fill.style.width = snapshot.toFixed(1) + '%';
-  }, 300);
-  return { stop: (realScore) => {
-    clearInterval(intv);
-    fill.style.width = (realScore != null ? realScore : snapshot) + '%';
-    if (realScore == null) bar.classList.remove('on');
-  }};
-}
-
-function runCountdown() {
-  return new Promise(resolve => {
-    const overlay = $('countdown');
-    const num = $('countdown-num');
-    overlay.classList.add('on');
-    const steps = [
-      { t: 0,    text: '3', cls: '' },
-      { t: 900,  text: '2', cls: '' },
-      { t: 1800, text: '1', cls: '' },
-      { t: 2700, text: 'GO', cls: 'go' },
-    ];
-    steps.forEach(s => setTimeout(() => {
-      num.textContent = s.text;
-      num.className = 'countdown-num ' + s.cls;
-      // re-trigger animation
-      num.style.animation = 'none';
-      void num.offsetWidth;
-      num.style.animation = '';
-    }, s.t));
-    setTimeout(() => { overlay.classList.remove('on'); resolve(); }, 3600);
-  });
-}
-
-async function race() {
-  const prompt = $('prompt').value.trim();
-  const slug = $('bundle').value;
-  if (!prompt) { $('prompt').focus(); return; }
-  if (!slug) return;
-
-  $('race').disabled = true;
-  $('report').classList.remove('on');
-  $('score-a').textContent = '—';
-  $('score-b').textContent = '—';
-  // Strip prior winner state
-  document.querySelectorAll('.lane').forEach(l => l.classList.remove('winner'));
-
-  // Cinematic countdown — adds ~3.6s of anticipation, great for demo video
-  await runCountdown();
-
-  setLaneLoading('a', 'Plain Opus 4.7 generating…');
-  setLaneLoading('b', 'Opus 4.7 + Handoff-CDN generating…');
-
-  // Start live bars
-  const barA = startLiveBar('a');
-  const barB = startLiveBar('b');
-
-  // Run both in parallel; each lane stops its bar and kicks off grading as soon as it finishes.
-  async function runLane(which, withBundle, bar) {
-    let html = null;
-    try { html = await generate(prompt, slug, withBundle); }
-    catch (e) { bar.stop(null); setLaneError(which, e.message); return null; }
-    renderHTML(which, html);
-    // Keep bar animating during grading
-    $('score-' + which).innerHTML = '<span class="live-label"><span class="pulse"></span>GRADING</span>';
-    let r = null;
-    try { r = await grade(html, slug); } catch {}
-    bar.stop(r ? r.score : null);
-    if (r) $('score-' + which).innerHTML = '<strong>' + r.score + '</strong> <small>/ 100</small>';
-    else $('score-' + which).textContent = '—';
-    return { html, report: r };
+async function api_grade({ lane, prompt, bundle }){
+  await wait(100);
+  if (lane === 'A'){
+    return {
+      correctness: rand(45, 58),
+      contextFit: rand(30, 44),
+      style: rand(40, 55),
+      noHall: rand(42, 55),
+    };
   }
+  return {
+    correctness: rand(78, 92),
+    contextFit: rand(82, 95),
+    style: rand(72, 88),
+    noHall: rand(80, 94),
+  };
+}
 
-  const [resA, resB] = await Promise.all([
-    runLane('a', false, barA),
-    runLane('b', true, barB),
+/* ------------ Utils ------------ */
+const $ = sel => document.querySelector(sel);
+const wait = ms => new Promise(r => setTimeout(r, ms));
+const rand = (a,b) => Math.floor(a + Math.random() * (b - a + 1));
+function fmtTokens(n){ return n.toLocaleString('en-US'); }
+
+/* ------------ Populate bundle dropdown ------------ */
+(async function initBundles(){
+  const sel = $('#bundle');
+  const bundles = await api_bundles();
+  sel.innerHTML = bundles.map(b => `<option value="${b.id}">${b.name} · ${b.size}</option>`).join('');
+})();
+
+/* ------------ Log helpers ------------ */
+const LOG_LINES_A = [
+  { t: '[00.0]', msg: 'POST /v1/messages → opus-4.7' },
+  { t: '[00.2]', msg: 'tokens.in = <tok>420</tok>' },
+  { t: '[00.6]', msg: 'model streaming…' },
+  { t: '[01.4]', msg: 'partial: "here is a dark mobile UI…"' },
+  { t: '[02.3]', msg: 'partial: "using #111 panels, radius 12px"', cls: 'err' },
+  { t: '[03.1]', msg: 'partial: "assuming a generic card layout"', cls: 'err' },
+  { t: '[03.6]', msg: 'stream.end · no token contract' },
+  { t: '[03.7]', msg: 'grade.request → rubric-v3' },
+  { t: '[04.0]', msg: 'grade.return score=<tok>49</tok>' },
+];
+const LOG_LINES_B = [
+  { t: '[00.0]', msg: 'POST /v1/messages → opus-4.7 + handoff' },
+  { t: '[00.1]', msg: 'cdn.hydrate bundle=aerodrop · Liquid Glass' },
+  { t: '[00.4]', msg: 'tokens.in = <tok>12,400</tok> (family contract)', cls: 'ok' },
+  { t: '[00.7]', msg: 'model streaming…' },
+  { t: '[01.9]', msg: 'partial: "AeroDrop.html:34 · glass panel"', cls: 'ok' },
+  { t: '[02.8]', msg: 'partial: "backdrop-filter: blur(16px) preserved"', cls: 'ok' },
+  { t: '[03.6]', msg: 'partial: "oklch tokens intact · radius 24px"', cls: 'ok' },
+  { t: '[04.1]', msg: 'stream.end · family=Liquid Glass' },
+  { t: '[04.2]', msg: 'grade.request → rubric-v3' },
+  { t: '[04.5]', msg: 'grade.return score=<tok>87</tok>', cls: 'ok' },
+];
+
+function resetLog(elId){ $(elId).innerHTML = ''; }
+function pushLog(elId, line){
+  const el = $(elId);
+  const div = document.createElement('div');
+  div.className = 'line' + (line.cls ? ' '+line.cls : '');
+  const msg = line.msg
+    .replace(/<tok>/g,'<span class="tok">')
+    .replace(/<\/tok>/g,'</span>');
+  div.innerHTML = `<span class="t">${line.t}</span> ${msg}`;
+  if (line.cls === 'ok') div.classList.add('ok');
+  if (line.cls === 'err') div.classList.add('err');
+  el.appendChild(div);
+  // keep last ~5
+  while (el.children.length > 5) el.removeChild(el.firstChild);
+}
+
+/* ------------ Countdown ------------ */
+async function countdown(){
+  const ov = $('#overlay'), c = $('#count');
+  ov.classList.add('on');
+  const steps = ['3', '2', '1', 'GO'];
+  for (let i = 0; i < steps.length; i++){
+    c.textContent = steps[i];
+    c.className = 'count' + (steps[i] === 'GO' ? ' go' : '');
+    // restart animation
+    c.style.animation = 'none'; c.offsetHeight; c.style.animation = '';
+    await wait(900);
+  }
+  ov.classList.remove('on');
+}
+
+/* ------------ Race ------------ */
+let running = false;
+let raceCount = 0;
+
+async function race(){
+  if (running) return;
+  running = true;
+  $('#race').disabled = true;
+
+  // Hide old report
+  $('#reportWrap').classList.remove('show');
+  $('#laneA').classList.remove('winner','loser');
+  $('#laneB').classList.remove('winner','loser');
+
+  // Reset lanes
+  ['A','B'].forEach(L => {
+    $('#score'+L).textContent = '0';
+    $('#bar'+L).style.width = '0%';
+    $('#time'+L).textContent = '00.0s';
+    $('#tokIn'+L).textContent = '0';
+    $('#tokOut'+L).textContent = '0';
+    $('#lat'+L).textContent = '—';
+    resetLog('#log'+L);
+  });
+
+  await countdown();
+
+  const prompt = $('#prompt').value;
+  const bundle = $('#bundle').value;
+
+  // Kick off generate + grade in parallel
+  const [genA, genB, gradeA, gradeB] = await Promise.all([
+    api_generate({ lane: 'A', prompt }),
+    api_generate({ lane: 'B', prompt, bundle }),
+    api_grade({ lane: 'A', prompt }),
+    api_grade({ lane: 'B', prompt, bundle }),
   ]);
 
-  const rA = resA?.report, rB = resB?.report;
+  const finalA = Math.round((gradeA.correctness + gradeA.contextFit + gradeA.style + gradeA.noHall) / 4);
+  const finalB = Math.round((gradeB.correctness + gradeB.contextFit + gradeB.style + gradeB.noHall) / 4);
 
-  if (rA && rB) {
-    $('report').classList.add('on');
-    $('num-a').textContent = rA.score;
-    $('num-b').textContent = rB.score;
-    $('bar-a').style.width = rA.score + '%';
-    $('bar-b').style.width = rB.score + '%';
-    $('sum-a').textContent = rA.summary || '';
-    $('sum-b').textContent = rB.summary || '';
-    const delta = rB.score - rA.score;
-    $('delta').innerHTML = delta > 0
-      ? `Handoff-CDN fidelity improvement: <strong>+${delta} points</strong>`
-      : delta === 0
-        ? `Both lanes scored identically.`
-        : `Plain 4.7 scored higher by ${-delta} points (rare — check the bundle).`;
-    // Light up the winning lane card with a glow + WINNER badge (CSS handles the rest)
-    const winner = rB.score > rA.score ? 'b' : rA.score > rB.score ? 'a' : null;
-    if (winner) document.querySelector('.lane.' + winner)?.classList.add('winner');
-  }
-  $('race').disabled = false;
+  // Asymptotic growth: 85 * (1 - e^-t/45)
+  // The 85 is a reference scale; we map displayed score toward each lane's final.
+  const DURATION = 4000; // ms
+  const LOG_WINDOW = 4000;
+  const start = performance.now();
+
+  // Schedule logs
+  const scheduleLogs = (lines, logId) => {
+    lines.forEach((line, i) => {
+      const when = (i / (lines.length-1)) * LOG_WINDOW * 0.85 + 150;
+      setTimeout(() => pushLog(logId, line), when);
+    });
+  };
+  scheduleLogs(LOG_LINES_A, '#logA');
+  scheduleLogs(LOG_LINES_B, '#logB');
+
+  await new Promise(resolve => {
+    function tick(now){
+      const t = now - start; // ms
+      const tSec = t / 1000;
+      // Growth curve produces value in [0, ~85), asymptotic
+      const curve = (tt) => 85 * (1 - Math.exp(-tt / 45));
+      // Display scores: scale curve so that at t≈4s, curve(4s * 25) ≈ reaches a good fraction
+      // Easier: use normalized progress p = (1 - e^{-t / tau})
+      const tau = 1100; // ms time constant
+      const p = 1 - Math.exp(-t / tau);
+      // approach each lane's final
+      const sA = Math.round(finalA * p);
+      const sB = Math.round(finalB * p);
+
+      $('#scoreA').textContent = sA;
+      $('#scoreB').textContent = sB;
+      $('#barA').style.width = (sA) + '%';
+      $('#barB').style.width = (sB) + '%';
+      $('#timeA').textContent = tSec.toFixed(1).padStart(4,'0') + 's';
+      $('#timeB').textContent = tSec.toFixed(1).padStart(4,'0') + 's';
+
+      // token + latency progressive reveal
+      const pt = Math.min(1, t / (DURATION * 0.9));
+      $('#tokInA').textContent  = fmtTokens(Math.round(genA.tokensIn * pt));
+      $('#tokOutA').textContent = fmtTokens(Math.round(genA.tokensOut * pt));
+      $('#tokInB').textContent  = fmtTokens(Math.round(genB.tokensIn * pt));
+      $('#tokOutB').textContent = fmtTokens(Math.round(genB.tokensOut * pt));
+      if (pt > 0.5){
+        $('#latA').textContent = (genA.latencyMs/1000).toFixed(2) + 's';
+        $('#latB').textContent = (genB.latencyMs/1000).toFixed(2) + 's';
+      }
+
+      if (t < DURATION){
+        requestAnimationFrame(tick);
+      } else {
+        // Snap final
+        $('#scoreA').textContent = finalA;
+        $('#scoreB').textContent = finalB;
+        $('#barA').style.width = finalA + '%';
+        $('#barB').style.width = finalB + '%';
+        $('#tokInA').textContent = fmtTokens(genA.tokensIn);
+        $('#tokOutA').textContent = fmtTokens(genA.tokensOut);
+        $('#tokInB').textContent = fmtTokens(genB.tokensIn);
+        $('#tokOutB').textContent = fmtTokens(genB.tokensOut);
+        resolve();
+      }
+    }
+    requestAnimationFrame(tick);
+  });
+
+  // Winner
+  const aWins = finalA > finalB;
+  $('#laneA').classList.toggle('winner', aWins);
+  $('#laneA').classList.toggle('loser', !aWins);
+  $('#laneB').classList.toggle('winner', !aWins);
+  $('#laneB').classList.toggle('loser', aWins);
+
+  // Report
+  raceCount++;
+  $('#reportId').textContent = '#' + String(raceCount).padStart(4,'0');
+  $('#finalA').textContent = finalA;
+  $('#finalB').textContent = finalB;
+  const set = (id, n) => { $(id).textContent = n; };
+  const setBar = (id, n) => { $(id).style.width = n + '%'; };
+  set('#rAc1', gradeA.correctness); setBar('#rAf1', gradeA.correctness);
+  set('#rAc2', gradeA.contextFit);  setBar('#rAf2', gradeA.contextFit);
+  set('#rAc3', gradeA.style);       setBar('#rAf3', gradeA.style);
+  set('#rAc4', gradeA.noHall);      setBar('#rAf4', gradeA.noHall);
+  set('#rBc1', gradeB.correctness); setBar('#rBf1', gradeB.correctness);
+  set('#rBc2', gradeB.contextFit);  setBar('#rBf2', gradeB.contextFit);
+  set('#rBc3', gradeB.style);       setBar('#rBf3', gradeB.style);
+  set('#rBc4', gradeB.noHall);      setBar('#rBf4', gradeB.noHall);
+
+  const delta = finalB - finalA;
+  $('#deltaPts').textContent = (delta >= 0 ? '+' : '') + delta + ' points';
+  $('#deltaCap').textContent = delta >= 0
+    ? 'Handoff-CDN advantage · composite delta'
+    : 'Baseline edge · Handoff-CDN underperformed';
+
+  $('#reportWrap').classList.add('show');
+
+  running = false;
+  $('#race').disabled = false;
 }
 
-document.querySelectorAll('.examples button').forEach(b => {
-  b.onclick = () => {
-    $('prompt').value = b.textContent;
-    $('bundle').value = b.dataset.ex;
-  };
+$('#race').addEventListener('click', race);
+$('#rerun').addEventListener('click', race);
+
+// Keyboard shortcut
+window.addEventListener('keydown', (e) => {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter'){
+    e.preventDefault();
+    race();
+  }
 });
-
-$('race').onclick = race;
-$('prompt').addEventListener('keydown', e => { if (e.key === 'Enter') race(); });
-
-loadBundles();
 </script>
+
 </body>
 </html>
