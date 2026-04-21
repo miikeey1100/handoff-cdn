@@ -2,3 +2,11 @@ node_modules/
 .DS_Store
 *.log
 .vercel
+
+# Local-only: launch playbook, strategy docs, draft posts, debug files
+.launch-private/
+PLAN.md
+demo-output.html
+*.local.html
+.env
+.env.*
